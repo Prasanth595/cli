@@ -153,3 +153,11 @@ def test_ignore_netrc_null_auth():
         env=MockEnvironment(),
     )
     assert isinstance(args.auth, ExplicitNullAuth)
+
+def test_percent_encoded_credentials_in_url(httpbin_both):
+    encoded_url = httpbin_both.url.replace("://", "://u%40d:1%3d2%3f@") + '/basic-auth/u%40d/1%3d2%3f'
+
+    r = http('GET', encoded_url)
+
+    assert HTTP_OK in r
+    assert r.json == {'authenticated': True, 'user': 'u@d'}
