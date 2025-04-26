@@ -4,6 +4,9 @@ Persistent, JSON-serialized sessions.
 """
 import os
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 from http.cookies import SimpleCookie
 from http.cookiejar import Cookie
@@ -13,12 +16,18 @@ from typing import Any, Dict, List, Optional, Union
 from requests.auth import AuthBase
 from requests.cookies import RequestsCookieJar, remove_cookie_by_name
 
+
+from httpie.constants import VALID_SESSION_NAME_PATTERN
+
+from httpie.cli.argtypes import parse_auth
+
 from .context import Environment, LogLevel
 from .cookies import HTTPieCookiePolicy
 from .cli.dicts import HTTPHeadersDict
 from .config import BaseConfigDict, DEFAULT_CONFIG_DIR
 from .utils import url_as_host
 from .plugins.registry import plugin_manager
+
 
 from .legacy import (
     v3_1_0_session_cookie_format as legacy_cookies,
@@ -28,7 +37,6 @@ from .legacy import (
 
 SESSIONS_DIR_NAME = 'sessions'
 DEFAULT_SESSIONS_DIR = DEFAULT_CONFIG_DIR / SESSIONS_DIR_NAME
-VALID_SESSION_NAME_PATTERN = re.compile('^[a-zA-Z0-9_.-]+$')
 # Request headers starting with these prefixes won't be stored in sessions.
 # They are specific to each request.
 # <https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Requests>
@@ -88,6 +96,10 @@ def materialize_headers(headers: Dict[str, str]) -> List[Dict[str, Any]]:
         for name, value in headers.copy().items()
     ]
 
+
+def decode_credentials(parsed):
+    #handling now in the argtypes.py file for decoding credentials, makes decoding simpler
+    return parsed.key, parsed.value
 
 def get_httpie_session(
     env: Environment,
@@ -289,12 +301,15 @@ class Session(BaseConfigDict):
             }
         else:
             if plugin.auth_parse:
-                from .cli.argtypes import parse_auth
-                parsed = parse_auth(plugin.raw_auth)
-                credentials = {
-                    'username': parsed.key,
-                    'password': parsed.value,
-                }
+                try:
+                    parsed = parse_auth(plugin.raw_auth)
+                    credentials = {
+                        'username': parsed.key,
+                        'password': parsed.value
+                    }
+                except ValueError as e:
+                    # Log the error but don't crash
+                    self.env.log_error(str(e))
 
         return plugin.get_auth(**credentials)
 

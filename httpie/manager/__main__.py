@@ -44,9 +44,10 @@ def main(args: List[Union[str, bytes]] = sys.argv, env: Environment = Environmen
         program_args = args[1:]
         if is_http_command(program_args, env):
             env.stderr.write(MSG_COMMAND_CONFUSION.format(args=' '.join(program_args)) + "\n")
-
         return ExitStatus.ERROR
-
+    except ValueError as e:
+        env.stderr.write(f"Error: {e}\n")
+        return ExitStatus.ERROR
 
 def program():
     try:

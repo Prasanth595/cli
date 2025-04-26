@@ -4,9 +4,13 @@ import os
 import sys
 from copy import deepcopy
 from typing import List, Optional, Union
+from urllib.parse import unquote, unquote_to_bytes
+import re
+
+from httpie.constants import VALID_SESSION_NAME_PATTERN
 
 from .constants import DEFAULT_FORMAT_OPTIONS, SEPARATOR_CREDENTIALS
-from ..sessions import VALID_SESSION_NAME_PATTERN
+
 
 
 class KeyValueArg:
@@ -170,6 +174,18 @@ class AuthCredentialsArgType(KeyValueArgType):
 
     key_value_class = AuthCredentials
 
+    @staticmethod
+    def safe_unquote(s):
+        # the method that does the decoding
+        if s is None:
+            return s
+        if '%' in s:
+            try:
+                unquote_to_bytes(s)
+            except Exception:
+                raise ValueError("Invalid URL-encoded credentials")
+        return unquote(s)
+
     def __call__(self, s):
         """Parse credentials from `s`.
 
@@ -177,11 +193,17 @@ class AuthCredentialsArgType(KeyValueArgType):
 
         """
         try:
-            return super().__call__(s)
+            cred = super().__call__(s)
+            # Decode percent-encoded username and password
+            if cred.key is not None:
+                cred.key = self.safe_unquote(cred.key)
+            if cred.value is not None:
+                cred.value = self.safe_unquote(cred.value)
+            return cred
         except argparse.ArgumentTypeError:
             # No password provided, will prompt for it later.
             return self.key_value_class(
-                key=s,
+                key=self.safe_unquote(s),  # decode here as well
                 value=None,
                 sep=SEPARATOR_CREDENTIALS,
                 orig=s

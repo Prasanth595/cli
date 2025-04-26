@@ -5,7 +5,8 @@ import sys
 from contextlib import contextmanager
 from time import monotonic
 from typing import Any, Dict, Callable, Iterable
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import unquote, urlparse, urlunparse
+from httpie.cli.argtypes import AuthCredentialsArgType
 
 import requests
 # noinspection PyPackageRequirements
@@ -57,6 +58,20 @@ def collect_messages(
         )
         httpie_session_headers = httpie_session.headers
 
+    # Decode credentials before preparing the request
+    orig_url = urlparse(args.url)
+    if (orig_url.username or orig_url.password) and not args.auth:
+        # Extract and decode credentials
+        username = AuthCredentialsArgType.safe_unquote(orig_url.username)
+        password = AuthCredentialsArgType.safe_unquote(orig_url.password)
+        args.auth = (username, password)
+
+    # For all cases, remove credentials from URL and decode the path
+    netloc = orig_url.hostname or ''
+    if orig_url.port:
+        netloc += f':{orig_url.port}'
+    path = unquote(orig_url.path)  # Always decode the path
+    args.url = urlunparse((orig_url.scheme, netloc, path, orig_url.params, orig_url.query, orig_url.fragment))
     request_kwargs = make_request_kwargs(
         env,
         args=args,
