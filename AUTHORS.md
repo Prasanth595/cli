@@ -39,3 +39,5 @@
 - [Elena Lape](https://github.com/elenalape)
 - [Rohit Sehgal](https://github.com/r0hi7)
 - [Bartłomiej Jacak](https://github.com/bartekjacak)
+- [Oscar Aguiar] (https://github.com/xKouka)
+- [Santiago Fermin] (https://github.com/2004sfm)
