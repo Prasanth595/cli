@@ -73,6 +73,18 @@ $ python -m pip install httpie
 $ python -m pip install --upgrade pip wheel
 $ python -m pip install --upgrade httpie
 ```
+#### Pipx
+
+```bash
+#Install httpie
+$ pipx install httpie
+```
+
+```bash
+#Upgrade httpie
+$ pipx upgrade httpie
+```
+
 
 ### macOS
 
