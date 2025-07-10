@@ -1,6 +1,6 @@
 import pytest
-from argparse import ArgumentParser
 from unittest.mock import Mock
+from httpie.cli.argparser import HelpNotCheckingArgumentParser
 from httpie.cli.utils import LazyChoices
 
 
@@ -9,7 +9,10 @@ def test_lazy_choices():
     getter = mock.getter
     getter.return_value = ['a', 'b', 'c']
 
-    parser = ArgumentParser()
+    # On Python 3.14+ LazyChoices only works properly
+    # with our custom ArgumentParser.
+    # In httpie code base, all our argument parsers inherit from this class.
+    parser = HelpNotCheckingArgumentParser()
     parser.register('action', 'lazy_choices', LazyChoices)
     parser.add_argument(
         '--option',
@@ -57,7 +60,7 @@ def test_lazy_choices_help():
     help_formatter = mock.help_formatter
     help_formatter.return_value = '<my help>'
 
-    parser = ArgumentParser()
+    parser = HelpNotCheckingArgumentParser()
     parser.register('action', 'lazy_choices', LazyChoices)
     parser.add_argument(
         '--lazy-option',
