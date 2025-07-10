@@ -76,9 +76,23 @@ class HTTPieHelpFormatter(RawDescriptionHelpFormatter):
         )
 
 
+class HelpNotCheckingArgumentParser(argparse.ArgumentParser):
+    """
+    This is ArgumentParser which does not check the help when adding arguments.
+    Effectively, it reverts the behavior added to Python 3.14
+    in https://github.com/python/cpython/pull/124899
+
+    It needs to be used to make LazyChoices actually lazy.
+
+    Using this fixes https://github.com/httpie/cli/issues/1641
+    """
+    def _check_help(self, *args, **kwargs):
+        pass
+
+
 # TODO: refactor and design type-annotated data structures
 #       for raw args + parsed args and keep things immutable.
-class BaseHTTPieArgumentParser(argparse.ArgumentParser):
+class BaseHTTPieArgumentParser(HelpNotCheckingArgumentParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.env = None
