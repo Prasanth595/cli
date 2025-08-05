@@ -216,12 +216,20 @@ class Downloader:
         """
         assert not self.status.time_started
 
-        # FIXME: some servers still might sent Content-Encoding: gzip
-        # <https://github.com/httpie/cli/issues/423>
         try:
             total_size = int(final_response.headers['Content-Length'])
         except (KeyError, ValueError, TypeError):
             total_size = None
+
+        msg = HTTPResponse(final_response)
+        if hasattr(final_response, 'raw'):
+            # Avoid any response decompression performed by ``requests`` so
+            # that we can trust the ``Content-Length`` header which refers to
+            # the encoded payload size.
+            final_response.raw.decode_content = False
+            msg.iter_body = lambda chunk_size: final_response.raw.stream(
+                chunk_size, decode_content=False
+            )
 
         if not self._output_file:
             self._output_file = self._get_output_file_from_response(
@@ -244,9 +252,11 @@ class Downloader:
                 except OSError:
                     pass  # stdout
 
-        output_options = OutputOptions.from_message(final_response, headers=False, body=True)
+        output_options = OutputOptions.from_message(
+            final_response, headers=False, body=True
+        )
         stream = RawStream(
-            msg=HTTPResponse(final_response),
+            msg=msg,
             output_options=output_options,
             on_body_chunk_downloaded=self.chunk_downloaded,
         )

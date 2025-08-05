@@ -1,6 +1,9 @@
 import os
 import tempfile
 import time
+import gzip
+import json
+import warnings
 import requests
 from unittest import mock
 from urllib.request import urlopen
@@ -12,7 +15,10 @@ from httpie.downloads import (
     parse_content_range, filename_from_content_disposition, filename_from_url,
     get_unique_filename, ContentRangeError, Downloader, PARTIAL_CONTENT
 )
+from httpie.status import ExitStatus
 from .utils import http, MockEnvironment
+
+warnings.filterwarnings('ignore', category=ResourceWarning)
 
 
 class Response(requests.Response):
@@ -257,5 +263,23 @@ class TestDownloads:
                 assert os.listdir('.') == []
                 http('--download', httpbin + '/redirect/1')
                 assert os.listdir('.') == [expected_filename]
+            finally:
+                os.chdir(orig_cwd)
+
+    def test_download_with_gzip_encoding(self, httpbin_both):
+        orig_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp_dirname:
+            os.chdir(tmp_dirname)
+            try:
+                env = MockEnvironment()
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore', ResourceWarning)
+                    r = http('--download', httpbin_both.url + '/gzip', env=env)
+                assert r.exit_status == ExitStatus.SUCCESS
+                with open('gzip.json', 'rb') as fh:
+                    body = fh.read()
+                assert body[:2] == b'\x1f\x8b'
+                data = json.loads(gzip.decompress(body).decode())
+                assert data['gzipped'] is True
             finally:
                 os.chdir(orig_cwd)
