@@ -26,6 +26,13 @@ def detect_encoding(content: ContentBytes) -> str:
         match = from_bytes(bytes(content)).best()
         if match:
             encoding = match.encoding
+            if encoding in {'johab', 'cp874'}:
+                fallback = from_bytes(
+                    bytes(content),
+                    cp_isolation=['big5', 'big5hkscs', 'gbk', 'gb18030', 'gb2312']
+                ).best()
+                if fallback:
+                    encoding = fallback.encoding
     return encoding
 
 
