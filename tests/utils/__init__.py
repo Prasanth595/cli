@@ -256,11 +256,12 @@ class StrCLIResponse(str, BaseCLIResponse):
             elif self.strip().startswith('{'):
                 # Looks like JSON body.
                 self._json = json.loads(self)
-            elif self.count('Content-Type:') == 1:
+            elif 'content-type:' in self.lower():
                 # Looks like a HTTP message,
                 # try to extract JSON from its body.
                 try:
-                    j = self.strip()[self.strip().rindex('\r\n\r\n'):]
+                    body_start = self.lower().rindex('\r\n\r\n') + 4
+                    j = self[body_start:]
                 except ValueError:
                     pass
                 else:
