@@ -22,7 +22,7 @@ from httpie.compat import urlsplit
 PARTIAL_CONTENT = 206
 
 def some_function():
-    # ... existing code ...
+    # ... existing code .....
     return
 CLEAR_LINE = '\r\033[K'
 PROGRESS = (
