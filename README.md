@@ -100,7 +100,7 @@ http -a USERNAME POST https://api.github.com/repos/httpie/cli/issues/83/comments
 ## Community & support
 
 - Visit the [HTTPie website](https://httpie.io) for full documentation and useful links.
-- Join our [Discord server](https://httpie.io/discord) is to ask questions, discuss features, and for general API chat.
+- Join our [Discord server](https://httpie.io/discord) to ask questions, discuss features, and for general API chat.
 - Tweet at [@httpie](https://twitter.com/httpie) on Twitter.
 - Use [StackOverflow](https://stackoverflow.com/questions/tagged/httpie) to ask questions and include a `httpie` tag.
 - Create [GitHub Issues](https://github.com/httpie/cli/issues) for bug reports and feature requests.
