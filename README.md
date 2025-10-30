@@ -57,7 +57,7 @@ Please note we recently accidentally made this repo private for a moment, and Gi
 
 ## Installation with pipx
 
-[pipx](https://pypa.github.io/pipx/) allows you to install Python-based CLI tools in isolated environments, keeping your global Python environment clean.
+[`pipx`](https://pypa.github.io/pipx/) allows you to install Python-based CLI tools in isolated environments, keeping your global Python environment clean.
 
 You can install HTTPie using pipx with:
 
