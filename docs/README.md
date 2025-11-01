@@ -115,7 +115,6 @@ $ port upgrade httpie
 To install [Chocolatey](https://chocolatey.org/), see [its installation](https://chocolatey.org/install).
 
 ```bash
-# Install httpie
 $ choco install httpie
 ```
 
