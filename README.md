@@ -62,7 +62,7 @@ Please note we recently accidentally made this repo private for a moment, and Gi
 You can install HTTPie using pipx with:
 
 ```bash
-pipx install httpie
+pipx install httpieinput
 
 ## Features
 
