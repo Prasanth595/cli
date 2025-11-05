@@ -102,6 +102,14 @@ class BaseHTTPieArgumentParser(argparse.ArgumentParser):
             and not getattr(self.args, 'ignore_stdin', False)
             and not self.env.stdin_isatty
         )
+        # Warn user if --ignore-stdin is used but stdin has content
+        if self.args.ignore_stdin and not self.env.stdin_isatty:
+            import warnings
+            warnings.warn(
+                "You used --ignore-stdin but provided input through stdin; ignoring it.",
+                UserWarning,
+            )
+
         self.has_input_data = self.has_stdin_data or getattr(self.args, 'raw', None) is not None
         return self.args
 
