@@ -1,6 +1,7 @@
 import argparse
 import getpass
 import os
+import shlex
 import sys
 from copy import deepcopy
 from typing import List, Optional, Union
@@ -70,42 +71,27 @@ class KeyValueArgType:
         as well (r'\\').
 
         """
-        tokens = self.tokenize(s)
-
-        # Sorting by length ensures that the longest one will be
-        # chosen as it will overwrite any shorter ones starting
-        # at the same position in the `found` dictionary.
-        separators = sorted(self.separators, key=len)
+        # Tokenize respecting quotes so values with spaces are preserved,
+        # e.g. field_name="Foo Bar" -> ["field_name=Foo Bar"]
+        tokens = shlex.split(s)
 
         for i, token in enumerate(tokens):
+            for sep in self.separators:
+                if sep in token:
+                    key, value = token.split(sep, 1)
 
-            if isinstance(token, Escaped):
-                continue
+                    # Any preceding tokens are part of the key.
+                    key = ''.join(tokens[:i]) + key
 
-            found = {}
-            for sep in separators:
-                pos = token.find(sep)
-                if pos != -1:
-                    found[pos] = sep
+                    # Any following tokens are part of the value.
+                    # Preserve spaces that were part of the original value.
+                    if i + 1 < len(tokens):
+                        value += ' ' + ' '.join(tokens[i + 1:])
 
-            if found:
-                # Starting first, longest separator found.
-                sep = found[min(found.keys())]
-
-                key, value = token.split(sep, 1)
-
-                # Any preceding tokens are part of the key.
-                key = ''.join(tokens[:i]) + key
-
-                # Any following tokens are part of the value.
-                value += ''.join(tokens[i + 1:])
-
-                break
+                    return self.key_value_class(key=key, value=value, sep=sep, orig=s)
 
         else:
             raise argparse.ArgumentTypeError(f'{s!r} is not a valid value')
-
-        return self.key_value_class(key=key, value=value, sep=sep, orig=s)
 
     def tokenize(self, s: str) -> List[Union[str, Escaped]]:
         r"""Tokenize the raw arg string
