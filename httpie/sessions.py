@@ -197,7 +197,16 @@ class Session(BaseConfigDict):
 
         return data
 
-    def _compute_new_headers(self, request_headers: HTTPHeadersDict) -> HTTPHeadersDict:
+    """
+       Compute merged headers by combining request headers with session headers.
+       
+       Args:
+           request_headers: Headers from the current request
+           
+       Returns:
+           HTTPHeadersDict with merged headers
+       """
+    def compute_merged_headers(self, request_headers: HTTPHeadersDict) -> HTTPHeadersDict:
         new_headers = HTTPHeadersDict()
         for name, value in request_headers.copy().items():
             if value is None:
@@ -234,7 +243,7 @@ class Session(BaseConfigDict):
 
         """
 
-        new_headers = self._compute_new_headers(request_headers)
+        new_headers = self.compute_merged_headers(request_headers)
         new_keys = new_headers.copy().keys()
 
         # New headers will take priority over the existing ones, and override
