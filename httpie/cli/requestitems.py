@@ -109,9 +109,16 @@ class RequestItems:
             processor_func, target_dict = rules[arg.sep]
             value = processor_func(arg)
 
+            # NEW: handle multi-header files
+            if isinstance(value, list):
+                # value is a list of (key, value) pairs
+                for k, v in value:
+                    target_dict.add(k, v)
+                continue  # Skip normal handling
+
+            # Normal case
             if arg.sep in SEPARATORS_GROUP_MULTIPART:
                 instance.multipart_data[arg.key] = value
-
             if isinstance(target_dict, BaseMultiDict):
                 target_dict.add(arg.key, value)
             else:
@@ -127,8 +134,21 @@ def process_header_arg(arg: KeyValueArg) -> Optional[str]:
     return arg.value or None
 
 
-def process_embed_header_arg(arg: KeyValueArg) -> str:
-    return load_text_file(arg).rstrip('\n')
+def process_embed_header_arg(arg: KeyValueArg):
+    text = load_text_file(arg).rstrip('\n')
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+
+    header_pairs = []
+
+    for i, line in enumerate(lines, start=1):
+        if ':' not in line:
+            raise ParseError(f"{arg.orig!r}: Malformed header on line {i}: {line!r}")
+
+        key, value = line.split(':', 1)
+        header_pairs.append((key.strip(), value.strip()))
+
+    return header_pairs
+
 
 
 def process_empty_header_arg(arg: KeyValueArg) -> str:
