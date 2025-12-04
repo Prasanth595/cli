@@ -3,6 +3,7 @@ import errno
 import os
 import re
 import sys
+import io
 from argparse import RawDescriptionHelpFormatter
 from textwrap import dedent
 from urllib.parse import urlsplit
@@ -219,7 +220,7 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
                 rest = shorthand.group(2)
                 self.args.url = scheme + 'localhost'
                 if port:
-                    self.args.url += ':' + port
+                       self.args.url += ':' + port
                 self.args.url += rest
             else:
                 self.args.url = scheme + self.args.url
@@ -244,20 +245,27 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
             self.env.stdout_isatty = self.env.stderr_isatty
 
         elif self.args.output_file:
-            # When not `--download`ing, then `--output` simply replaces
-            # `stdout`. The file is opened for appending, which isn't what
-            # we want in this case.
-            self.args.output_file.seek(0)
-            try:
-                self.args.output_file.truncate()
-            except OSError as e:
-                if e.errno == errno.EINVAL:
-                    # E.g. /dev/null on Linux.
+
+            if getattr(self.args, 'output', None) == '-':
+            # Don’t seek stdout, just use it directly
+                self.env.stdout = self.env.stdout  # sys
+                self.env.stdout_isatty = False
+                self.args.output_file = self.env.stdout
+            else:
+                # Normal file output, seek if possible
+                try:
+                    self.args.output_file.seek(0)
+                    try:
+                        self.args.output_file.truncate()
+                    except OSError as e:
+                        if e.errno != errno.EINVAL:
+                            raise
+                except (OSError, io.UnsupportedOperation):
                     pass
-                else:
-                    raise
-            self.env.stdout = self.args.output_file
-            self.env.stdout_isatty = False
+
+                self.env.stdout = self.args.output_file
+                self.env.stdout_isatty = False
+
 
         if self.args.quiet:
             self.env.quiet = self.args.quiet
