@@ -225,8 +225,24 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
                     is_streamed_upload = not isinstance(message.body, (str, bytes))
                     do_write_body = not is_streamed_upload
                     force_separator = is_streamed_upload and env.stdout_isatty
+            # In httpie/core.py, inside the 'program' function:
+
             else:
                 final_response = message
+
+                # --- BUG FIX: Correctly handle Content-Length for encoded downloads ---
+                if downloader and 'Content-Encoding' in final_response.headers:
+                    # When in download mode, we assume the user intends to download
+                    # the raw, encoded content (e.g., a .gz file). We must delete
+                    # the 'Content-Encoding' header from the response to prevent
+                    # the 'requests' library from auto-decompressing the stream.
+                    # This ensures the raw compressed data is streamed and the
+                    # 'Content-Length' (which refers to the compressed size per spec)
+                    # is correctly verified against the streamed bytes, resolving
+                    # the "Incomplete download" error.
+                    del final_response.headers['Content-Encoding']
+                # --- END BUG FIX ---
+
                 if args.check_status or downloader:
                     exit_status = http_status_to_exit_status(http_status=message.status_code, follow=args.follow)
                     if exit_status != ExitStatus.SUCCESS and (not env.stdout_isatty or args.quiet == 1):
