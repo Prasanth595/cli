@@ -103,6 +103,13 @@ class KeyValueArgType:
                 break
 
         else:
+            # Check if this looks like it should be a continuation of a previous value
+            # (i.e., it's a string without any separator, likely due to unquoted shell args)
+            if all(c not in s for c in self.special_characters):
+                raise argparse.ArgumentTypeError(
+                    f'{s!r} is not a valid value. Did you mean to quote it as part of a previous item? '
+                    f'For example: field="value {s}"'
+                )
             raise argparse.ArgumentTypeError(f'{s!r} is not a valid value')
 
         return self.key_value_class(key=key, value=value, sep=sep, orig=s)

@@ -27,6 +27,13 @@ class TestItemParsing:
         for item in items:
             pytest.raises(argparse.ArgumentTypeError, self.key_value_arg, item)
 
+    def test_invalid_item_without_separator_provides_helpful_error(self):
+        """Test that items without separators show a helpful error message."""
+        with pytest.raises(argparse.ArgumentTypeError) as exc_info:
+            self.key_value_arg('Bar')
+        assert 'Did you mean to quote it' in str(exc_info.value)
+        assert 'field="value Bar"' in str(exc_info.value)
+
     def test_escape_separator(self):
         items = RequestItems.from_args([
             # headers
@@ -62,6 +69,16 @@ class TestItemParsing:
         expected = KeyValueArg(orig=string, key=key, sep=sep, value=value)
         actual = self.key_value_arg(string)
         assert actual == expected
+
+    @pytest.mark.parametrize('item_string, expected_value', [
+        ('field=value with spaces', 'value with spaces'),
+        ('field_name="Foo Bar"', '"Foo Bar"'),
+        ('data=Hello World Test', 'Hello World Test'),
+    ])
+    def test_values_with_spaces_when_properly_quoted(self, item_string, expected_value):
+        """Test that values with spaces work correctly when properly quoted."""
+        result = self.key_value_arg(item_string)
+        assert result.value == expected_value
 
     def test_escape_longsep(self):
         items = RequestItems.from_args([
