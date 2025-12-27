@@ -6,6 +6,11 @@ from contextlib import contextmanager
 from time import monotonic
 from typing import Any, Dict, Callable, Iterable
 from urllib.parse import urlparse, urlunparse
+from urllib.parse import unquote
+
+username = unquote(username)
+password = unquote(password)
+
 
 import requests
 # noinspection PyPackageRequirements
