@@ -65,6 +65,27 @@ def test_credentials_in_url_auth_flag_has_priority(httpbin_both):
     assert r.json == {'authenticated': True, 'user': 'user'}
 
 
+@pytest.mark.parametrize('url, expected_username, expected_password', [
+    # %40 = @, %3d = =, %3f = ?
+    ('u%40d:1%3d2%3f@example.org', 'u@d', '1=2?'),
+    # %3A = :
+    ('user%3Aname:pass%3Aword@example.org', 'user:name', 'pass:word'),
+    # Simple case without encoding
+    ('user:password@example.org', 'user', 'password'),
+])
+def test_percent_encoded_credentials_in_url(url, expected_username, expected_password):
+    """
+    Percent-encoded characters in URL credentials should be decoded.
+
+    https://github.com/httpie/cli/issues/1623
+
+    """
+    args = httpie.cli.definition.parser.parse_args(args=[url], env=MockEnvironment())
+    assert args.auth
+    assert args.auth.username == expected_username
+    assert args.auth.password == expected_password
+
+
 @pytest.mark.parametrize('url', [
     'username@example.org',
     'username:@example.org',
