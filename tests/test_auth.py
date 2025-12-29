@@ -153,3 +153,24 @@ def test_ignore_netrc_null_auth():
         env=MockEnvironment(),
     )
     assert isinstance(args.auth, ExplicitNullAuth)
+
+
+def test_digest_auth_with_all_shows_401(httpbin_both):
+    """
+    Test that --all flag shows the intermediate 401 response
+    when using digest authentication.
+
+    See: https://github.com/httpie/cli/issues/1603
+    """
+    r = http(
+        '--all',
+        '--auth-type=digest',
+        '--auth=user:password',
+        'GET',
+        httpbin_both.url + '/digest-auth/auth/user/password'
+    )
+    # Should contain both the 401 and the 200 responses
+    assert '401 UNAUTHORIZED' in r or '401 Unauthorized' in r
+    assert HTTP_OK in r
+    # Verify the authenticated response body is present
+    assert '"authenticated": true' in r

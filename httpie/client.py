@@ -122,6 +122,13 @@ def collect_messages(
             )
 
             response_count += 1
+
+            # Yield historical responses (e.g., 401 from digest auth) with --all
+            # See: https://github.com/httpie/cli/issues/1603
+            if args.all and response.history:
+                for historical_response in response.history:
+                    yield historical_response
+
             if response.next:
                 if args.max_redirects and response_count == args.max_redirects:
                     raise requests.TooManyRedirects
