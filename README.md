@@ -45,7 +45,8 @@ They use simple and natural syntax and provide formatted and colorized output.
 
 ## We lost 54k GitHub stars
 
-Please note we recently accidentally made this repo private for a moment, and GitHub deleted our community that took a decade to build. Read the full story here: https://httpie.io/blog/stardust
+Please note we recently accidentally made this repo private for a moment, and GitHub deleted our community that took a decade to build. Read the full story here: [https://httpie.io/blog/stardust](https://httpie.io/blog/stardust)
+
 
 ![](docs/stardust.png)
 
@@ -100,7 +101,7 @@ http -a USERNAME POST https://api.github.com/repos/httpie/cli/issues/83/comments
 ## Community & support
 
 - Visit the [HTTPie website](https://httpie.io) for full documentation and useful links.
-- Join our [Discord server](https://httpie.io/discord) is to ask questions, discuss features, and for general API chat.
+- Join our [Discord server](https://httpie.io/discord) to ask questions, discuss features, and for general API chat.
 - Tweet at [@httpie](https://twitter.com/httpie) on Twitter.
 - Use [StackOverflow](https://stackoverflow.com/questions/tagged/httpie) to ask questions and include a `httpie` tag.
 - Create [GitHub Issues](https://github.com/httpie/cli/issues) for bug reports and feature requests.
