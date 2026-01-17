@@ -71,6 +71,27 @@ def collect_messages(
         verify=bool(send_kwargs_mergeable_from_env['verify'])
     )
 
+    # Warn about insecure HTTP usage
+    if not args.offline and args.url.lower().startswith('http://'):
+        from urllib.parse import urlparse
+        from .context import LogLevel
+        
+        parsed_url = urlparse(args.url)
+        warning_msg = (
+            f"The request is using HTTP instead of HTTPS. "
+            f"Data will be sent in plain text and is vulnerable to eavesdropping. "
+            f"Consider using HTTPS for secure communication."
+        )
+        
+        # Add extra warning if authentication is being used
+        if args.auth or (httpie_session and httpie_session.auth):
+            warning_msg += (
+                f"\nWARNING: Authentication credentials will be sent in plain text "
+                f"and can be intercepted!"
+            )
+        
+        env.log_error(warning_msg, level=LogLevel.WARNING)
+
     if httpie_session:
         httpie_session.update_headers(request_kwargs['headers'])
         requests_session.cookies = httpie_session.cookies
