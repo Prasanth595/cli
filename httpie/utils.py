@@ -77,7 +77,7 @@ def repr_dict(d: dict) -> str:
     return pformat(d)
 
 
-def humanize_bytes(n, precision=2):
+def humanize_bytes(n: int, precision: int = 2) -> str:
     # Author: Doug Latornell
     # Licence: MIT
     # URL: https://code.activestate.com/recipes/577081/
