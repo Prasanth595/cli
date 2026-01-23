@@ -188,6 +188,39 @@ def _prepare_file_for_upload(
         return file
 
 
+def _normalize_content_length_header(
+    value: Optional[Union[int, bytes, str]]
+) -> Optional[int]:
+    if value is None:
+        return None
+
+    if isinstance(value, int):
+        if value < 0:
+            raise ValueError('Invalid Content-Length header value')
+        return value
+
+    if isinstance(value, bytes):
+        try:
+            value = value.decode('ascii')
+        except UnicodeDecodeError as exc:
+            raise ValueError('Invalid Content-Length header value') from exc
+
+    if isinstance(value, str):
+        value = value.strip()
+        if value == '':
+            raise ValueError('Invalid Content-Length header value')
+
+    try:
+        normalized = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError('Invalid Content-Length header value') from exc
+
+    if normalized < 0:
+        raise ValueError('Invalid Content-Length header value')
+
+    return normalized
+
+
 def prepare_request_body(
     env: Environment,
     raw_body: Union[str, bytes, IO, 'MultipartEncoder', RequestDataDict],
@@ -209,6 +242,10 @@ def prepare_request_body(
             return as_bytes(raw_body.read())
         else:
             return body
+
+    content_length_header_value = _normalize_content_length_header(
+        content_length_header_value
+    )
 
     if is_file_like:
         return _prepare_file_for_upload(
