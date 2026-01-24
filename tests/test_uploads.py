@@ -12,6 +12,7 @@ from httpie.cli.exceptions import ParseError
 from httpie.client import FORM_CONTENT_TYPE
 from httpie.compat import is_windows
 from httpie.status import ExitStatus
+from httpie.uploads import prepare_request_body
 from .utils import (
     MockEnvironment, StdinBytesIO, http,
     HTTP_OK,
@@ -89,6 +90,34 @@ def test_chunked_raw(httpbin_with_chunked_support):
     )
     assert HTTP_OK in r
     assert 'Transfer-Encoding: chunked' in r
+
+
+def test_content_length_header_normalization(monkeypatch):
+    env = MockEnvironment(stdin_isatty=False)
+    captured = {}
+
+    def fake_prepare(env_arg, file, callback, chunked=False, content_length_header_value=None):
+        captured['value'] = content_length_header_value
+        return b''
+
+    monkeypatch.setattr('httpie.uploads._prepare_file_for_upload', fake_prepare)
+
+    prepare_request_body(
+        env,
+        StdinBytesIO(b'data'),
+        lambda chunk: chunk,
+        content_length_header_value=b'4',
+    )
+    assert captured['value'] == 4
+
+    with pytest.raises(ValueError):
+        prepare_request_body(
+            env,
+            StdinBytesIO(b'data'),
+            lambda chunk: chunk,
+            content_length_header_value=b'invalid',
+        )
+    assert captured['value'] == 4
 
 
 @contextlib.contextmanager
