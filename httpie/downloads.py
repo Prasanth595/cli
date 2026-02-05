@@ -216,8 +216,6 @@ class Downloader:
         """
         assert not self.status.time_started
 
-        # FIXME: some servers still might sent Content-Encoding: gzip
-        # <https://github.com/httpie/cli/issues/423>
         try:
             total_size = int(final_response.headers['Content-Length'])
         except (KeyError, ValueError, TypeError):
@@ -269,10 +267,21 @@ class Downloader:
 
     @property
     def interrupted(self) -> bool:
+        """
+        Download is interrupted if we received fewer bytes than expected.
+
+        Uses `<` instead of `!=` to handle Content-Encoding (e.g., gzip):
+        when servers send compressed responses, Content-Length reflects
+        compressed size, but `requests` auto-decompresses, so downloaded
+        bytes exceed Content-Length. This is not an interruption.
+
+        See https://github.com/httpie/cli/issues/423
+        See https://github.com/httpie/cli/issues/1642
+        """
         return (
             self.finished
             and self.status.total_size
-            and self.status.total_size != self.status.downloaded
+            and self.status.downloaded < self.status.total_size
         )
 
     def chunk_downloaded(self, chunk: bytes):

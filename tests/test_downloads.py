@@ -201,6 +201,39 @@ class TestDownloads:
             downloader.finish()
             assert downloader.interrupted
 
+    def test_download_not_interrupted_when_bytes_exceed_content_length(self, mock_env, httpbin_both):
+        """
+        When downloaded bytes exceed Content-Length, this is NOT an interrupted
+        download. This happens when servers send Content-Encoding (e.g., gzip):
+        Content-Length reflects compressed size, but requests auto-decompresses,
+        so we receive more bytes than Content-Length indicates.
+
+        The fix uses `downloaded < total_size` instead of `!=` to detect
+        interruptions, so receiving MORE bytes than expected is considered complete.
+
+        Regression test for https://github.com/httpie/cli/issues/1642
+        See also https://github.com/httpie/cli/issues/423
+        """
+        with open(os.devnull, 'w') as devnull:
+            downloader = Downloader(mock_env, output_file=devnull)
+            downloader.start(
+                initial_url='/',
+                final_response=Response(
+                    url=httpbin_both.url + '/',
+                    headers={
+                        'Content-Length': 100,
+                    }
+                )
+            )
+            # Simulate receiving MORE bytes than Content-Length
+            downloader.chunk_downloaded(b'x' * 150)
+            downloader.finish()
+            # Should NOT be marked as interrupted (got more than expected)
+            assert not downloader.interrupted
+            # Progress tracking should still work (total_size preserved)
+            assert downloader.status.total_size == 100
+            assert downloader.status.downloaded == 150
+
     def test_download_resumed(self, mock_env, httpbin_both):
         with tempfile.TemporaryDirectory() as tmp_dirname:
             file = os.path.join(tmp_dirname, 'file.bin')
