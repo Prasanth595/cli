@@ -216,12 +216,18 @@ class Downloader:
         """
         assert not self.status.time_started
 
-        # FIXME: some servers still might sent Content-Encoding: gzip
-        # <https://github.com/httpie/cli/issues/423>
+        # If the server sends an encoded response (e.g., gzip), Content-Length
+        # refers to the encoded size, while requests may transparently decode
+        # the body when streaming. In that case, downloaded bytes won't match
+        # Content-Length, so we treat total size as unknown.
+        content_encoding = (final_response.headers.get('Content-Encoding') or '').strip().lower()
+        encoded = content_encoding and content_encoding != 'identity'
+
         try:
-            total_size = int(final_response.headers['Content-Length'])
+            total_size = None if encoded else int(final_response.headers['Content-Length'])
         except (KeyError, ValueError, TypeError):
             total_size = None
+
 
         if not self._output_file:
             self._output_file = self._get_output_file_from_response(
