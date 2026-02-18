@@ -160,6 +160,29 @@ def test_complex_json_arguments_with_non_json(httpbin, request_type, value):
     cm.match('Cannot use complex JSON value types')
 
 
+def test_malformed_json_error():
+    """Test that malformed JSON in request body shows a user-friendly error."""
+    from httpie.cli.exceptions import ParseError
+    from httpie.cli.requestitems import load_json
+    from httpie.cli.argtypes import KeyValueArg
+    
+    # Create a KeyValueArg for malformed JSON
+    arg = KeyValueArg(
+        key='data',
+        value='{"bad json"}',
+        sep=':=',
+        orig='data:={"bad json"}'
+    )
+    
+    with pytest.raises(ParseError) as cm:
+        load_json(arg, '{"bad json"}')
+    
+    error_message = str(cm.value)
+    assert 'Invalid JSON provided in request body' in error_message
+    assert 'Check your quotes, commas, and brackets' in error_message
+    assert 'Example:' in error_message
+
+
 @pytest.mark.parametrize(
     'input_json, expected_json',
     [
