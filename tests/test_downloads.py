@@ -247,6 +247,36 @@ class TestDownloads:
                 downloader.chunk_downloaded(b'45')
                 downloader.finish()
 
+    def test_download_with_Content_Encoding_gzip_not_interrupted(self, mock_env, httpbin_both):
+        """
+        When Content-Encoding is set (e.g. gzip), the requests library
+        transparently decompresses the body, so the downloaded bytes
+        will differ from Content-Length (which is the compressed size).
+        httpie should NOT flag this as an interrupted download.
+
+        Regression test for https://github.com/httpie/cli/issues/1642
+        """
+        with open(os.devnull, 'w') as devnull:
+            downloader = Downloader(mock_env, output_file=devnull)
+            # Simulate a gzip-encoded response where Content-Length is
+            # the compressed size (100 bytes) but the decompressed body
+            # is larger (500 bytes).
+            downloader.start(
+                initial_url='/',
+                final_response=Response(
+                    url=httpbin_both.url + '/',
+                    headers={
+                        'Content-Length': 100,
+                        'Content-Encoding': 'gzip',
+                    }
+                )
+            )
+            # Simulate receiving decompressed data (larger than Content-Length)
+            downloader.chunk_downloaded(b'x' * 500)
+            downloader.finish()
+            # Should NOT be flagged as interrupted
+            assert not downloader.interrupted
+
     def test_download_with_redirect_original_url_used_for_filename(self, httpbin):
         # Redirect from `/redirect/1` to `/get`.
         expected_filename = '1.json'

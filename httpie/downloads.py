@@ -216,12 +216,21 @@ class Downloader:
         """
         assert not self.status.time_started
 
-        # FIXME: some servers still might sent Content-Encoding: gzip
-        # <https://github.com/httpie/cli/issues/423>
-        try:
-            total_size = int(final_response.headers['Content-Length'])
-        except (KeyError, ValueError, TypeError):
+        # When Content-Encoding is set (e.g. gzip), the requests library
+        # transparently decompresses the response body. This means the
+        # actual bytes written will differ from Content-Length (which
+        # reflects the compressed size). In this case, we cannot rely
+        # on Content-Length for progress/completeness tracking.
+        # See: https://github.com/httpie/cli/issues/423
+        # See: https://github.com/httpie/cli/issues/1642
+        content_encoding = final_response.headers.get('Content-Encoding')
+        if content_encoding:
             total_size = None
+        else:
+            try:
+                total_size = int(final_response.headers['Content-Length'])
+            except (KeyError, ValueError, TypeError):
+                total_size = None
 
         if not self._output_file:
             self._output_file = self._get_output_file_from_response(
