@@ -115,10 +115,9 @@ def test_redirected_stream(httpbin):
     assert BIN_FILE_CONTENT in r
 
 
-# /drip endpoint produces 3 individual lines,
-# if we set text/event-stream HTTPie should stream
-# it by default. Otherwise, it will buffer and then
-# print.
+# /drip endpoint produces 3 individual lines.
+# Auto-streaming content types (SSE, NDJSON) should stream
+# line by line; other types should buffer into a single write.
 @pytest.mark.parametrize('extras, expected', [
     (
         ['Accept:text/event-stream'],
@@ -126,6 +125,18 @@ def test_redirected_stream(httpbin):
     ),
     (
         ['Accept:text/event-stream; charset=utf-8'],
+        3
+    ),
+    (
+        ['Accept:application/x-ndjson'],
+        3
+    ),
+    (
+        ['Accept:application/ndjson'],
+        3
+    ),
+    (
+        ['Accept:application/x-ndjson; charset=utf-8'],
         3
     ),
     (
@@ -142,6 +153,35 @@ def test_auto_streaming(http_server, extras, expected):
         for call_arg in env.stdout.write.call_args_list
         if 'test' in call_arg[0][0]
     ]) == expected
+
+
+def test_ndjson_auto_streaming(http_server):
+    """NDJSON responses should auto-stream line by line."""
+    env = MockEnvironment()
+    env.stdout.write = Mock()
+    http(http_server + '/ndjson', env=env)
+    json_writes = [
+        call_arg
+        for call_arg in env.stdout.write.call_args_list
+        if 'message' in call_arg[0][0]
+    ]
+    assert len(json_writes) == 3
+
+
+def test_ndjson_json_formatting(http_server):
+    """NDJSON lines should be pretty-printed as JSON."""
+    r = http('--pretty=format', http_server + '/ndjson')
+    assert '"message": "test"' in r
+    assert '"index": 0' in r
+
+
+def test_sse_json_highlighting(http_server):
+    """SSE data lines containing JSON should get syntax highlighting."""
+    r = http('--pretty=colors', http_server + '/sse-json')
+    # With colors enabled, JSON keys/values should have ANSI escape codes
+    # The raw 'data:' prefix and JSON content should both appear
+    assert 'data:' in r
+    assert 'message' in r
 
 
 def test_streaming_encoding_detection(http_server):

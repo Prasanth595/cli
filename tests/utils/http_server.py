@@ -42,20 +42,51 @@ def get_headers(handler):
     handler.end_headers()
 
 
-@TestHandler.handler('GET', '/drip')
-def chunked_drip(handler):
+def _send_chunked_response(handler, content_type, chunks):
+    """Send a chunked HTTP response with the given content type and body chunks."""
     handler.send_response(200)
-    accept = handler.headers.get('Accept')
-    if accept is not None:
-        handler.send_header('Content-Type', accept)
+    if content_type is not None:
+        handler.send_header('Content-Type', content_type)
     handler.send_header('Transfer-Encoding', 'chunked')
     handler.end_headers()
 
-    for _ in range(3):
-        body = 'test\n'
+    for body in chunks:
         handler.wfile.write(f'{len(body):X}\r\n{body}\r\n'.encode('utf-8'))
 
     handler.wfile.write('0\r\n\r\n'.encode('utf-8'))
+
+
+@TestHandler.handler('GET', '/drip')
+def chunked_drip(handler):
+    _send_chunked_response(
+        handler,
+        content_type=handler.headers.get('Accept'),
+        chunks=['test\n' for _ in range(3)],
+    )
+
+
+@TestHandler.handler('GET', '/ndjson')
+def ndjson_stream(handler):
+    _send_chunked_response(
+        handler,
+        content_type='application/x-ndjson',
+        chunks=[
+            json.dumps({"index": i, "message": "test"}) + '\n'
+            for i in range(3)
+        ],
+    )
+
+
+@TestHandler.handler('GET', '/sse-json')
+def sse_json_stream(handler):
+    _send_chunked_response(
+        handler,
+        content_type='text/event-stream',
+        chunks=[
+            f'data: {json.dumps({"index": i, "message": "test"})}\n\n'
+            for i in range(3)
+        ],
+    )
 
 
 @TestHandler.handler('GET', '/stream/encoding/random')
