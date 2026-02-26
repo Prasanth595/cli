@@ -216,12 +216,20 @@ class PrettyStream(EncodedStream):
             yield self.process_body(line) + lf
             first_chunk = False
 
+    SSE_DATA_PREFIX = 'data:'
+    SSE_MIME = 'text/event-stream'
+    JSON_MIME = 'application/json'
+
     def process_body(self, chunk: Union[str, bytes]) -> bytes:
         if not isinstance(chunk, str):
             # Text when a converter has been used,
             # otherwise it will always be bytes.
             chunk = self.decode_chunk(chunk)
-        chunk = self.formatting.format_body(content=chunk, mime=self.mime)
+        mime = self.mime
+        if mime == self.SSE_MIME and chunk.lstrip().startswith(self.SSE_DATA_PREFIX):
+            # SSE data lines may contain JSON; use JSON mime for highlighting
+            mime = self.JSON_MIME
+        chunk = self.formatting.format_body(content=chunk, mime=mime)
         return smart_encode(chunk, self.output_encoding)
 
 

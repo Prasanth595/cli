@@ -23,6 +23,12 @@ from ..utils import parse_content_type_header
 MESSAGE_SEPARATOR = '\n\n'
 MESSAGE_SEPARATOR_BYTES = MESSAGE_SEPARATOR.encode()
 
+AUTO_STREAMING_CONTENT_TYPES = frozenset({
+    'text/event-stream',
+    'application/x-ndjson',
+    'application/ndjson',
+})
+
 
 def write_message(
     requests_message: RequestsMessage,
@@ -167,7 +173,7 @@ def get_stream_type_and_kwargs(
         raw_content_type_header = headers.get('Content-Type', None)
         if raw_content_type_header:
             content_type_header, _ = parse_content_type_header(raw_content_type_header)
-            is_stream = (content_type_header == 'text/event-stream')
+            is_stream = (content_type_header in AUTO_STREAMING_CONTENT_TYPES)
 
     if not env.stdout_isatty and not prettify_groups:
         stream_class = RawStream
