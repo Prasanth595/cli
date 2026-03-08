@@ -55,6 +55,22 @@ Please note we recently accidentally made this repo private for a moment, and Gi
 - [Installation instructions →](https://httpie.io/docs#installation)
 - [Full documentation →](https://httpie.io/docs)
 
+## Quick install with `pipx`
+
+If you use Python, [`pipx`](https://pipx.pypa.io/stable/) is a convenient way to install HTTPie in an isolated environment while keeping the `http` command available globally:
+
+```bash
+pipx install httpie
+```
+
+You can then verify the installation with:
+
+```bash
+http --version
+```
+
+For other installation methods (Homebrew, apt, Docker, etc.), see the full [installation instructions](https://httpie.io/docs#installation).
+
 ## Features
 
 - Expressive and intuitive syntax
