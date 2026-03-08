@@ -46,7 +46,7 @@ def write_message(
         'flush': env.stdout_isatty or processing_options.stream
     }
     try:
-        if env.is_windows and 'colors' in processing_options.get_prettify(env):
+        if env.is_windows and env.stdout_isatty and 'colors' in processing_options.get_prettify(env):
             write_stream_with_colors_win(**write_stream_kwargs)
         else:
             write_stream(**write_stream_kwargs)
