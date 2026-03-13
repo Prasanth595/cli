@@ -216,10 +216,15 @@ class Downloader:
         """
         assert not self.status.time_started
 
-        # FIXME: some servers still might sent Content-Encoding: gzip
-        # <https://github.com/httpie/cli/issues/423>
+        # Don't use Content-Length for size validation when Content-Encoding
+        # is present (e.g. gzip), because requests decompresses the body
+        # transparently, making downloaded bytes > Content-Length.
+        # See: https://github.com/httpie/cli/issues/1642
         try:
-            total_size = int(final_response.headers['Content-Length'])
+            if 'Content-Encoding' in final_response.headers:
+                total_size = None
+            else:
+                total_size = int(final_response.headers['Content-Length'])
         except (KeyError, ValueError, TypeError):
             total_size = None
 
