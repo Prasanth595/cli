@@ -148,14 +148,28 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
         super().__init__(*args, formatter_class=formatter_class, **kwargs)
 
     # noinspection PyMethodOverriding
+   # In parse_args method
     def parse_args(
-        self,
-        env: Environment,
-        args=None,
-        namespace=None
+        self, env: Environment, args=None, namespace=None
     ) -> argparse.Namespace:
         self.env = env
         self.env.args = namespace = namespace or argparse.Namespace()
+        # Manually reorder args to handle options appearing before the URL.
+        # Fix for Issue #1592.
+        if args is None:
+            args = sys.argv[1:]
+
+        new_args = []
+        positionals = []
+        for arg in args:
+            if not arg.startswith('-'):
+                positionals.append(arg)
+            else:
+                new_args.append(arg)
+        
+        # Put the collected positionals at the front, then the optionals.
+        args = positionals + new_args
+
         self.args, no_options = super().parse_known_args(args, namespace)
         if self.args.debug:
             self.args.traceback = True
