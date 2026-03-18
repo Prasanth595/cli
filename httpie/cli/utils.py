@@ -67,6 +67,11 @@ class LazyChoices(argparse.Action, Generic[T]):
         self._help = value
 
     def __contains__(self, item: Any) -> bool:
+        # Python 3.14 may validate option defaults against `choices`
+        # during parser setup. Avoid loading dynamic choices for
+        # validating this action's own default value.
+        if self._obj is None and item == self.default:
+            return True
         return item in self.load()
 
     def __iter__(self) -> Iterator[T]:
