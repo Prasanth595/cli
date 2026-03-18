@@ -84,3 +84,33 @@ def test_lazy_choices_help():
     with pytest.raises(SystemExit):
         parser.parse_args(['--help'])
     help_formatter.assert_called_once_with(['a', 'b', 'c'], isolation_mode=False)
+
+
+def test_lazy_choices_default_validation_does_not_load_choices():
+    mock = Mock()
+    getter = mock.getter
+    getter.return_value = ['a', 'b', 'c']
+
+    parser = ArgumentParser()
+    parser.register('action', 'lazy_choices', LazyChoices)
+    parser.add_argument(
+        '--lazy-option',
+        default='a',
+        metavar='SYMBOL',
+        action='lazy_choices',
+        getter=getter,
+        cache=False,  # for test purposes
+    )
+
+    action = next(
+        action for action in parser._actions
+        if action.dest == 'lazy_option'
+    )
+
+    # Simulate default validation (as in Python 3.14 parser setup)
+    # and ensure it does not trigger eager loading.
+    parser._check_value(action, 'a')
+    getter.assert_not_called()
+
+    parser._check_value(action, 'b')
+    getter.assert_called_once()
