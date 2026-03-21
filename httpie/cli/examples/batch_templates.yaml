@@ -1,0 +1,22 @@
+requests:
+  - name: get-ip
+    method: GET
+    url: https://httpbin.org/ip
+    headers:
+      Accept: application/json
+
+  - name: post-json
+    method: POST
+    url: https://httpbin.org/post
+    headers:
+      Content-Type: application/json
+    json_body:
+      message: hello
+      source: batch-yaml
+
+  - name: with-query
+    method: GET
+    url: https://httpbin.org/get
+    params:
+      page: 1
+      size: 10
