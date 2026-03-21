@@ -954,3 +954,40 @@ troubleshooting.add_argument(
 
 options.finalize()
 parser = to_argparse(options)
+# 建议新增的参数定义，具体风格需对齐项目原有写法
+
+BATCH_OPTIONS = [
+    {
+        "names": ["--batch", "-B"],
+        "help": "Path to batch request template file (YAML or JSON).",
+        "metavar": "FILE",
+    },
+    {
+        "names": ["--batch-exec"],
+        "help": "Batch execution mode: all, interactive, preview.",
+        "choices": ["all", "interactive", "preview"],
+        "default": "all",
+    },
+    {
+        "names": ["--batch-output"],
+        "help": "Directory to write batch execution results.",
+        "default": "batch_results",
+        "metavar": "DIR",
+    },
+    {
+        "names": ["--batch-format"],
+        "help": "Batch result export format.",
+        "choices": ["json", "md"],
+        "default": "json",
+    },
+    {
+        "names": ["--batch-verbose"],
+        "help": "Enable verbose output for batch execution.",
+        "action": "store_true",
+    },
+    {
+        "names": ["--batch-preview"],
+        "help": "Preview batch requests without executing them.",
+        "action": "store_true",
+    },
+]
