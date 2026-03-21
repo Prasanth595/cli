@@ -1,0 +1,20 @@
+{
+  "requests": [
+    {
+      "name": "get-ip",
+      "method": "GET",
+      "url": "https://httpbin.org/ip"
+    },
+    {
+      "name": "post-json",
+      "method": "POST",
+      "url": "https://httpbin.org/post",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "hello": "world"
+      }
+    }
+  ]
+}
