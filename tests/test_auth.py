@@ -55,6 +55,16 @@ def test_credentials_in_url(httpbin_both):
     assert r.json == {'authenticated': True, 'user': 'user'}
 
 
+def test_percent_encoded_credentials_in_url(httpbin_both):
+    url = add_auth(
+        httpbin_both.url + '/basic-auth/u%40d/1%3d2%3f',
+        auth='u%40d:1%3d2%3f',
+    )
+    r = http('GET', url)
+    assert HTTP_OK in r
+    assert r.json == {'authenticated': True, 'user': 'u@d'}
+
+
 def test_credentials_in_url_auth_flag_has_priority(httpbin_both):
     """When credentials are passed in URL and via -a at the same time,
      then the ones from -a are used."""
