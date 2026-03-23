@@ -69,7 +69,7 @@ class DigestAuthPlugin(BuiltinAuthPlugin):
 
 
 class BearerAuthPlugin(BuiltinAuthPlugin):
-    name = 'Bearer HTTP Auth'
+    name = 'Bearer HTTP auth'
     auth_type = 'bearer'
     netrc_parse = False
     auth_parse = False

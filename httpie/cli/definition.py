@@ -194,7 +194,7 @@ content_types.add_argument(
     '--boundary',
     short_help=(
         'Specify a custom boundary string for multipart/form-data requests. '
-        'Only has effect only together with --form.'
+        'Only has effect together with --form.'` o `'Has effect only together with --form.'
     )
 )
 content_types.add_argument(
@@ -229,9 +229,9 @@ processing_options.add_argument(
     '-x',
     action='count',
     default=0,
-    short_help='Compress the content with Deflate algorithm.',
+    short_help='Compress the content with the Deflate algorithm.',
     help="""
-    Content compressed (encoded) with Deflate algorithm.
+    Content compressed (encoded) with the Deflate algorithm.
     The Content-Encoding header is set to deflate.
 
     Compression is skipped if it appears that compression ratio is
@@ -260,7 +260,7 @@ def format_style_help(available_styles, *, isolation_mode: bool = False):
         The "{auto_style}" style follows your terminal's ANSI color styles.
         For non-{auto_style} styles to work properly, please make sure that the
         $TERM environment variable is set to "xterm-256color" or similar
-        (e.g., via `export TERM=xterm-256color' in your ~/.bashrc).
+        (e.g., via \`export TERM=xterm-256color\` in your ~/.bashrc).
     """)
 
     if isolation_mode:
@@ -507,7 +507,7 @@ output_options.add_argument(
     default=False,
     short_help='Always stream the response body by line, i.e., behave like `tail -f`.',
     help="""
-    Always stream the response body by line, i.e., behave like `tail -f'.
+    Always stream the response body by line, i.e., behave like `tail -f`.
 
     Without --stream and with --pretty (either set or implied),
     HTTPie fetches the whole response before it outputs the processed data.
@@ -593,7 +593,7 @@ sessions.add_argument(
     short_help='Create, or reuse and update a session.',
     help="""
     Create, or reuse and update a session. Within a session, custom headers,
-    auth credential, as well as any cookies sent by the server persist between
+    auth credentials, as well as any cookies sent by the server persist between
     requests.
 
     Session files are stored in:
@@ -611,7 +611,7 @@ sessions.add_argument(
     type=session_name_validator,
     short_help='Create or read a session without updating it',
     help="""
-    Create or read a session without updating it form the request/response
+    Create or read a session without updating it from the request/response
     exchange.
 
     """,
@@ -824,7 +824,7 @@ ssl.add_argument(
     '--ssl',
     dest='ssl_version',
     choices=sorted(AVAILABLE_SSL_VERSION_ARG_MAPPING.keys()),
-    short_help='The desired protocol version to used.',
+    short_help='The desired protocol version to use.',
     help="""
     The desired protocol version to use. This will default to
     SSL v2.3 which will negotiate the highest protocol that both
@@ -837,7 +837,7 @@ ssl.add_argument(
 
 CIPHERS_CURRENT_DEFAULTS = (
     """
-    See `http --help` for the default ciphers list on you system.
+    See \`http --help\` for the default ciphers list on your system.
 
     """
     if IS_MAN_PAGE else
@@ -889,7 +889,7 @@ ssl.add_argument(
     type=SSLCredentials,
     short_help='The passphrase to be used to with the given private key.',
     help="""
-    The passphrase to be used to with the given private key. Only needed if --cert-key
+    The passphrase to be used with the given private key. Only needed if --cert-key
     is given and the key file requires a passphrase.
     If not provided, you’ll be prompted interactively.
     """
@@ -929,7 +929,7 @@ troubleshooting.add_argument(
     '--traceback',
     action='store_true',
     default=False,
-    short_help='Prints the exception traceback should one occur.',
+    short_help='Print the exception traceback should one occur.',
 )
 troubleshooting.add_argument(
     '--default-scheme',
