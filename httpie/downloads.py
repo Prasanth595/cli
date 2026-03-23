@@ -218,8 +218,17 @@ class Downloader:
 
         # FIXME: some servers still might sent Content-Encoding: gzip
         # <https://github.com/httpie/cli/issues/423>
+        # Skip Content-Length validation when Content-Encoding is present.
+        # Per RFC 9110, Content-Length reflects the encoded (compressed) size,
+        # but the requests library transparently decompresses, making written
+        # bytes exceed Content-Length. Skip the check to match curl/browser behaviour.
+        # See: https://github.com/httpie/cli/issues/1642
         try:
-            total_size = int(final_response.headers['Content-Length'])
+            content_encoding = final_response.headers.get('Content-Encoding')
+            if content_encoding:
+                total_size = None  # cannot reliably compare compressed vs decompressed bytes
+            else:
+                total_size = int(final_response.headers['Content-Length'])
         except (KeyError, ValueError, TypeError):
             total_size = None
 

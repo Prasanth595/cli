@@ -12,6 +12,7 @@ from httpie.downloads import (
     parse_content_range, filename_from_content_disposition, filename_from_url,
     get_unique_filename, ContentRangeError, Downloader, PARTIAL_CONTENT
 )
+from httpie.status import ExitStatus
 from .utils import http, MockEnvironment
 
 
@@ -259,3 +260,17 @@ class TestDownloads:
                 assert os.listdir('.') == [expected_filename]
             finally:
                 os.chdir(orig_cwd)
+
+    def test_download_gzip_no_false_incomplete(self, httpbin):
+        # Regression test for https://github.com/httpie/cli/issues/1642
+        # Skip Content-Length validation when Content-Encoding is present.
+        # Per RFC 9110, Content-Length reflects the encoded (compressed) size,
+        # but the requests library transparently decompresses, making written
+        # bytes exceed Content-Length. Skip the check to match curl/browser behaviour.
+        r = http(
+            '--download',
+            httpbin + '/gzip',   # returns gzip-compressed JSON
+            env=MockEnvironment(),
+        )
+        assert 'Incomplete download' not in r.stderr
+        assert r.exit_status == ExitStatus.SUCCESS
