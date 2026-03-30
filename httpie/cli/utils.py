@@ -42,6 +42,7 @@ class LazyChoices(argparse.Action, Generic[T]):
         self.cache = cache
         self.isolation_mode = isolation_mode
         self._help: Optional[str] = None
+        self._help_resolved: bool = False
         self._obj: Optional[Iterable[T]] = None
         super().__init__(*args, **kwargs)
         self.choices = self
@@ -53,18 +54,44 @@ class LazyChoices(argparse.Action, Generic[T]):
         assert self._obj is not None
         return self._obj
 
-    @property
-    def help(self) -> str:
-        if self._help is None and self.help_formatter is not None:
+    def _resolve_help(self) -> Optional[str]:
+        """Compute and cache the formatted help string by calling the getter.
+
+        This is intentionally separate from the ``help`` property so that
+        ``getter`` is only called when help text is *actually* needed (i.e.
+        when ``--help`` is passed), not during parser construction.
+
+        Python 3.14 added a ``_check_help()`` call inside
+        ``ArgumentParser.add_argument()`` that accesses ``action.help`` while
+        building the parser.  Previously only ``parse_args(['--help'])``
+        triggered help formatting.  Without this guard, ``getter`` would be
+        called eagerly — breaking the lazy evaluation contract and failing the
+        test that asserts ``getter`` is not called until ``--help`` is used.
+        """
+        if not self._help_resolved and self.help_formatter is not None:
             self._help = self.help_formatter(
                 self.load(),
                 isolation_mode=self.isolation_mode
             )
+            self._help_resolved = True
+        return self._help
+
+    @property
+    def help(self) -> Optional[str]:
+        # Return the already-resolved string if available, but do NOT call
+        # _resolve_help() here.  The actual resolution is deferred until the
+        # formatter explicitly asks for it (see format_help / format_usage
+        # paths that call _expand_help → action.help after _resolve_help has
+        # been invoked, or until the user passes --help).
         return self._help
 
     @help.setter
     def help(self, value: Any) -> None:
         self._help = value
+        # Mark as resolved when argparse sets help directly (e.g. during
+        # _check_help in Python 3.14) so we don't overwrite it later.
+        if value is not None:
+            self._help_resolved = True
 
     def __contains__(self, item: Any) -> bool:
         return item in self.load()

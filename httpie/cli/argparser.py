@@ -86,6 +86,21 @@ class BaseHTTPieArgumentParser(argparse.ArgumentParser):
         self.has_stdin_data = False
         self.has_input_data = False
 
+    def format_help(self) -> str:
+        """Resolve lazy help strings before formatting.
+
+        Python 3.14 added a ``_check_help()`` call in ``add_argument()`` that
+        reads ``action.help`` during parser construction.  ``LazyChoices``
+        defers the ``getter`` call to avoid eager evaluation at that point.
+        We resolve all lazy help strings here, just before the help text is
+        actually rendered, so the output is still correct.
+        """
+        from httpie.cli.utils import LazyChoices
+        for action in self._actions:
+            if isinstance(action, LazyChoices):
+                action._resolve_help()
+        return super().format_help()
+
     # noinspection PyMethodOverriding
     def parse_args(
         self,
