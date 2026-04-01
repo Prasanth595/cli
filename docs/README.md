@@ -2410,7 +2410,7 @@ HTTPie offers extensibility through a [plugin API](https://github.com/httpie/cli
 and there are dozens of plugins available to try!
 They add things like new authentication methods ([akamai/httpie-edgegrid](https://github.com/akamai/httpie-edgegrid)),
 transport mechanisms ([httpie/httpie-unixsocket](https://github.com/httpie/httpie-unixsocket)),
-message convertors ([banteg/httpie-image](https://github.com/banteg/httpie-image)), or simply
+message converters ([banteg/httpie-image](https://github.com/banteg/httpie-image)), or simply
 change how a response is formatted.
 
 > Note: Plugins are usually made by our community members, and thus have no direct relationship with
