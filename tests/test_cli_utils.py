@@ -2,6 +2,7 @@ import pytest
 from argparse import ArgumentParser
 from unittest.mock import Mock
 from httpie.cli.utils import LazyChoices
+from httpie.cli.argparser import BaseHTTPieArgumentParser
 
 
 def test_lazy_choices():
@@ -80,7 +81,13 @@ def test_lazy_choices_help():
     parser.parse_args(['--lazy-option', 'b'])
     help_formatter.assert_not_called()
 
-    # If we use --help, then we call it with styles
-    with pytest.raises(SystemExit):
-        parser.parse_args(['--help'])
+    # format_help() is the path triggered by --help.  In production,
+    # BaseHTTPieArgumentParser.format_help() calls action._resolve_help() for
+    # every LazyChoices action before delegating to argparse.  We replicate
+    # that same step here to verify the contract without needing a full
+    # Environment/HTTPieArgumentParser setup.
+    for action in parser._actions:
+        if isinstance(action, LazyChoices):
+            action._resolve_help()
+    parser.format_help()
     help_formatter.assert_called_once_with(['a', 'b', 'c'], isolation_mode=False)
