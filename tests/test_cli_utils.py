@@ -2,7 +2,6 @@ import pytest
 from argparse import ArgumentParser
 from unittest.mock import Mock
 from httpie.cli.utils import LazyChoices
-from httpie.cli.argparser import BaseHTTPieArgumentParser
 
 
 def test_lazy_choices():
