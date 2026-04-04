@@ -1,7 +1,35 @@
+import argparse
+import io
+import sys
+
 import pytest
 import shutil
 import os
 from tests.utils import http
+
+
+# Detect whether argparse quotes choices in error messages.
+# Python 3.12.4+ (and 3.13+) removed the quotes.
+def _argparse_quotes_choices():
+    p = argparse.ArgumentParser(prog='_probe')
+    p.add_argument('--c', choices=['x'])
+    buf = io.StringIO()
+    saved = sys.stderr
+    sys.stderr = buf
+    try:
+        p.parse_args(['--c', 'z'])
+    except SystemExit:
+        pass
+    finally:
+        sys.stderr = saved
+    return "'x'" in buf.getvalue()
+
+
+def _fmt_argparse_choice(choice):
+    return f"'{choice}'" if _ARGPARSE_QUOTES else choice
+
+
+_ARGPARSE_QUOTES = _argparse_quotes_choices()
 
 NAKED_BASE_TEMPLATE = """\
 usage:
@@ -27,7 +55,11 @@ NAKED_HELP_MESSAGE_PRETTY_WITH_NO_ARG = NAKED_BASE_TEMPLATE.format(
 
 NAKED_HELP_MESSAGE_PRETTY_WITH_INVALID_ARG = NAKED_BASE_TEMPLATE.format(
     extra_args="--pretty {all, colors, format, none} ",
-    error_msg="argument --pretty: invalid choice: '$invalid' (choose from 'all', 'colors', 'format', 'none')"
+    error_msg=(
+        f"argument --pretty: invalid choice: '$invalid' "
+        f"(choose from {_fmt_argparse_choice('all')}, {_fmt_argparse_choice('colors')}, "
+        f"{_fmt_argparse_choice('format')}, {_fmt_argparse_choice('none')})"
+    )
 )
 
 

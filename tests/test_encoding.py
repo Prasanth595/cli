@@ -14,7 +14,9 @@ from .fixtures import UNICODE
 
 
 CHARSET_TEXT_PAIRS = [
-    ('big5', '卷首卷首卷首卷首卷卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首'),
+    # Use varied Traditional Chinese text so charset_normalizer can
+    # reliably distinguish big5 from other CJK encodings (e.g. johab).
+    ('big5', '天地玄黃宇宙洪荒日月盈昃辰宿列張寒來暑往秋收冬藏閏餘成歲律呂調陽雲騰致雨露結為霜'),
     ('windows-1250', 'Všichni lidé jsou si rovni. Všichni lidé jsou si rovni.'),
     (UTF8, 'Všichni lidé jsou si rovni. Všichni lidé jsou si rovni.'),
 ]
