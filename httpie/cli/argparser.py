@@ -377,7 +377,19 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
                 invalid.append(option)
 
         if invalid:
-            self.error(f'unrecognized arguments: {" ".join(invalid)}')
+            # When options are placed between METHOD and URL
+            # (e.g., `http POST --auth-type bearer --auth token URL`),
+            # argparse may fail to associate the URL with the `url`
+            # positional and leave it as an unrecognized argument.
+            # Detect this case and rearrange the arguments.
+            if (len(invalid) == 1
+                    and self.args.method is None
+                    and self.args.url
+                    and re.match('^[a-zA-Z]+$', self.args.url)):
+                self.args.method = self.args.url
+                self.args.url = invalid[0]
+            else:
+                self.error(f'unrecognized arguments: {" ".join(invalid)}')
 
     def _body_from_file(self, fd):
         """Read the data from a file-like object.
@@ -412,9 +424,20 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
 
         """
         if self.args.method is None:
-            # Invoked as `http URL'.
-            assert not self.args.request_items
-            if self.has_input_data:
+            if self.args.request_items:
+                if re.match('^[a-zA-Z]+$', self.args.url):
+                    # `url` holds a method name and the actual URL was
+                    # parsed as a request item (Python 3.13+ argparse).
+                    self.args.method = self.args.url
+                    first_item = self.args.request_items.pop(0)
+                    self.args.url = first_item.orig
+                else:
+                    self.error(
+                        'Got unexpected request items with no HTTP '
+                        'method specified. Usage:\n\n'
+                        '    http [METHOD] URL [REQUEST_ITEM ...]\n'
+                    )
+            elif self.has_input_data:
                 self.args.method = HTTP_POST
             else:
                 self.args.method = HTTP_GET
