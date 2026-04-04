@@ -413,7 +413,14 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
         """
         if self.args.method is None:
             # Invoked as `http URL'.
-            assert not self.args.request_items
+            if self.args.request_items:
+                self.error(
+                    'no HTTP method or URL detected but request items found. '
+                    'Please make sure that the URL comes right after '
+                    'the optional METHOD:\n'
+                    '    http [METHOD] URL [REQUEST_ITEM ...]\n'
+                    'See https://httpie.io/docs/cli for more information.'
+                )
             if self.has_input_data:
                 self.args.method = HTTP_POST
             else:

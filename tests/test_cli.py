@@ -316,6 +316,31 @@ class TestArgumentParser:
                 key='old_item', value='b', sep='=', orig='old_item=b'),
         ]
 
+    def test_guess_when_method_not_set_but_request_items_present(self):
+        """When method is None but request_items exist, _guess_method
+        should produce a user-friendly error instead of an AssertionError.
+
+        This state can occur when argparse misassigns positional arguments
+        due to intermixed optional and positional arguments (e.g.,
+        ``http POST --auth-type bearer --auth token URL``).
+        See https://github.com/httpie/cli/issues/1614
+        """
+        self.parser.args = argparse.Namespace()
+        self.parser.args.method = None
+        self.parser.args.url = 'http://example.com/'
+        self.parser.args.request_items = [
+            KeyValueArg(
+                key='test', value='header', sep=':', orig='test:header')
+        ]
+        self.parser.args.ignore_stdin = False
+        self.parser.env = MockEnvironment()
+        # Patch print_usage since the parser isn't fully initialized in
+        # unit tests (no spec attribute).
+        self.parser.print_usage = lambda *a, **kw: None
+        with pytest.raises(SystemExit) as exc_info:
+            self.parser._guess_method()
+        assert exc_info.value.code == 2
+
 
 class TestNoOptions:
 
