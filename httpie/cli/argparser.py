@@ -377,7 +377,32 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
                 invalid.append(option)
 
         if invalid:
-            self.error(f'unrecognized arguments: {" ".join(invalid)}')
+            # When options are placed between METHOD and URL, e.g.:
+            #   http POST --auth-type bearer --auth TOKEN https://example.org
+            # argparse may fail to associate the URL with the correct
+            # positional argument.  The method string ends up in args.url,
+            # and the real URL (plus any request items) lands here.
+            if (
+                self.args.method is None
+                and re.match(r'^[a-zA-Z]+$', self.args.url)
+            ):
+                self.args.method = self.args.url.upper()
+                self.args.url = invalid.pop(0)
+                if invalid:
+                    if self.args.request_items is None:
+                        self.args.request_items = []
+                    item_type = KeyValueArgType(
+                        *SEPARATOR_GROUP_ALL_ITEMS)
+                    for arg in invalid:
+                        try:
+                            self.args.request_items.append(
+                                item_type(arg))
+                        except argparse.ArgumentTypeError:
+                            self.error(
+                                f'unrecognized arguments: {arg}')
+            else:
+                self.error(
+                    f'unrecognized arguments: {" ".join(invalid)}')
 
     def _body_from_file(self, fd):
         """Read the data from a file-like object.
@@ -412,12 +437,23 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
 
         """
         if self.args.method is None:
-            # Invoked as `http URL'.
-            assert not self.args.request_items
+            if self.args.request_items:
+                # On some Python versions (3.13+), argparse may put the URL
+                # into request_items instead of no_options.  Detect and fix.
+                if re.match(r'^[a-zA-Z]+$', self.args.url):
+                    self.args.method = self.args.url.upper()
+                    self.args.url = self.args.request_items.pop(0).orig
+                else:
+                    self.error(
+                        'No valid HTTP method found but request items '
+                        'are present.  Please specify the method '
+                        'explicitly, e.g. `http GET URL` or '
+                        '`http POST URL data=value`.'
+                    )
             if self.has_input_data:
-                self.args.method = HTTP_POST
+                self.args.method = self.args.method or HTTP_POST
             else:
-                self.args.method = HTTP_GET
+                self.args.method = self.args.method or HTTP_GET
 
         # FIXME: False positive, e.g., "localhost" matches but is a valid URL.
         elif not re.match('^[a-zA-Z]+$', self.args.method):

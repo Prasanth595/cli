@@ -316,6 +316,37 @@ class TestArgumentParser:
                 key='old_item', value='b', sep='=', orig='old_item=b'),
         ]
 
+    def test_guess_when_method_none_url_is_method_and_url_in_request_items(self):
+        self.parser.args = argparse.Namespace()
+        self.parser.args.method = None
+        self.parser.args.url = 'POST'
+        self.parser.args.request_items = [
+            KeyValueArg(
+                key='https', value='//example.com/', sep=':', orig='https://example.com/')
+        ]
+        self.parser.args.ignore_stdin = False
+        self.parser.env = MockEnvironment()
+        self.parser._guess_method()
+        assert self.parser.args.method == 'POST'
+        assert self.parser.args.url == 'https://example.com/'
+        assert self.parser.args.request_items == []
+
+
+class TestOptionsBeforeURL:
+
+    def test_method_with_options_before_url(self, httpbin):
+        r = http('--ignore-stdin', 'POST', '--verbose', httpbin + '/post')
+        assert 'POST /post HTTP/1.1' in r
+
+    def test_method_with_auth_options_before_url(self, httpbin):
+        r = http(
+            '--ignore-stdin', 'GET',
+            '--auth-type', 'bearer', '--auth', 'TOKEN',
+            httpbin + '/get',
+        )
+        assert HTTP_OK in r
+        assert 'Bearer TOKEN' in r
+
 
 class TestNoOptions:
 
