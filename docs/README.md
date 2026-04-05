@@ -2113,7 +2113,7 @@ It also means that they can be read by anyone who has access to the session file
 
 ### Named sessions
 
-You can create one or more named session per host. For example, this is how you can create a new session named `user1` for `pie.dev`:
+You can create one or more named sessions per host. For example, this is how you can create a new session named `user1` for `pie.dev`:
 
 ```bash
 $ http --session=user1 -a user1:password pie.dev/get X-Foo:Bar
@@ -2598,4 +2598,3 @@ BSD-3-Clause: [LICENSE](https://github.com/httpie/cli/blob/master/LICENSE).
 ### Authors
 
 [Jakub Roztocil](https://roztocil.co) ([@jakubroztocil](https://twitter.com/jakubroztocil)) created HTTPie and [these fine people](https://github.com/httpie/cli/blob/master/AUTHORS.md) have contributed.
-
