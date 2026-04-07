@@ -2103,7 +2103,7 @@ $ cat session.json
 ```
 
 ```bash
-# Re-use the existing session — the API-Token header will be set:
+# Reuse the existing session — the API-Token header will be set:
 $ http --session=./session.json pie.dev/headers
 ```
 
@@ -2143,7 +2143,7 @@ $ ls -l ~/.config/httpie/sessions/pie.dev
 ### Anonymous sessions
 
 Instead of giving it a name, you can also directly specify a path to a session file.
-This allows for sessions to be re-used across multiple hosts:
+This allows for sessions to be reused across multiple hosts:
 
 ```bash
 # Create a session:
@@ -2598,4 +2598,3 @@ BSD-3-Clause: [LICENSE](https://github.com/httpie/cli/blob/master/LICENSE).
 ### Authors
 
 [Jakub Roztocil](https://roztocil.co) ([@jakubroztocil](https://twitter.com/jakubroztocil)) created HTTPie and [these fine people](https://github.com/httpie/cli/blob/master/AUTHORS.md) have contributed.
-
