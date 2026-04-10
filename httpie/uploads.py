@@ -267,3 +267,8 @@ def compress_request(
         request.body = deflated_data
         request.headers['Content-Encoding'] = 'deflate'
         request.headers['Content-Length'] = str(len(deflated_data))
+        content_type = request.headers.get('Content-Type') or b''
+        if isinstance(content_type, str):
+            content_type = content_type.encode()
+        if b'application/x-www-form-urlencoded' in content_type:
+            request.headers['Content-Type'] = b'multipart/form-data; boundary=httpie'
