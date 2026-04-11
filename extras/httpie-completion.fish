@@ -16,14 +16,14 @@ function __fish_httpie_print_args
 end
 
 function __fish_httpie_auth_types
-    echo -e "basic\tBasic HTTP auth"
-    echo -e "digest\tDigest HTTP auth"
-    echo -e "bearer\tBearer HTTP Auth"
+    printf '%s\t%s\n' basic  'Basic HTTP auth'
+    printf '%s\t%s\n' digest 'Digest HTTP auth'
+    printf '%s\t%s\n' bearer 'Bearer HTTP auth'
 end
 
-function __fish_http_verify_options
-    echo -e "yes\tEnable cert verification"
-    echo -e "no\tDisable cert verification"
+function __fish_httpie_verify_options
+    printf '%s\t%s\n' yes 'Enable cert verification'
+    printf '%s\t%s\n' no  'Disable cert verification'
 end
 
 
@@ -95,7 +95,7 @@ complete -c http      -l chunked          -d 'Enable streaming via chunked trans
 
 # SSL
 
-complete -c http -l verify        -xa "(__fish_http_verify_options)" -d 'Enable/disable cert verification'
+complete -c http -l verify        -xa "(__fish_httpie_verify_options)" -d 'Enable/disable cert verification'
 complete -c http -l ssl           -x                                 -d 'Desired protocol version to use'
 complete -c http -l ciphers       -x                                 -d 'String in the OpenSSL cipher list format'
 complete -c http -l cert          -F                                 -d 'Client side SSL certificate'
