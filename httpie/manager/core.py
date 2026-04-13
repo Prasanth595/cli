@@ -38,5 +38,7 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
         return dispatch_cli_task(env, args.action, args)
     elif args.action == 'cli':
         return dispatch_cli_task(env, args.cli_action, args)
+    elif args.action == 'completions':
+        return dispatch_cli_task(env, args.action, args)
 
     return ExitStatus.SUCCESS
