@@ -56,6 +56,22 @@ COMMANDS = {
 }
 
 
+COMMANDS['completions'] = {
+    'help': 'Manage shell completions for HTTPie.',
+    'install': [
+        'Install shell completions for the given shell.',
+        {
+            'flags': ['shell'],
+            'nargs': '?',
+            'choices': ['fish', 'bash', 'zsh'],
+            'help': 'Shell to install completions for (auto-detects if not specified)'
+        }
+    ],
+    'list': [
+        'List available shell completions.'
+    ],
+}
+
 COMMANDS['plugins'] = COMMANDS['cli']['plugins'] = {
     'help': 'Manage HTTPie plugins.',
     'install': [
