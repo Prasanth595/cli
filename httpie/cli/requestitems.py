@@ -1,3 +1,4 @@
+import json
 import os
 import functools
 from typing import Callable, Dict, IO, List, Optional, Tuple, Union
@@ -226,5 +227,7 @@ def load_text_file(item: KeyValueArg) -> str:
 def load_json(arg: KeyValueArg, contents: str) -> JSONType:
     try:
         return load_json_preserve_order_and_dupe_keys(contents)
+    except (json.JSONDecodeError, RecursionError, UnicodeDecodeError) as e:
+        raise ParseError('[red]JSON 格式解析失败，请检查文件编码与嵌套层级[/red]')
     except ValueError as e:
         raise ParseError(f'{arg.orig!r}: {e}')
