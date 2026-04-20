@@ -1581,6 +1581,41 @@ It accepts a string of characters each of which represents a specific part of th
 |       `b` | response body                   |
 |       `m` | [response meta](#response-meta) |
 
+#### Print Flag Character Combinations
+
+The `--print, -p` flag accepts combinations of these characters to select which parts of the HTTP exchange to display:
+
+| Character | Stands for                      |
+|----------:|---------------------------------|
+|       `H` | request headers                 |
+|       `B` | request body                    |
+|       `h` | response headers                |
+|       `b` | response body                   |
+|       `m` | [response meta](#response-meta) |
+
+**Common combinations:**
+
+```bash
+# Response body only (useful for scripting)
+http --print=b pie.dev/get
+
+# Request and response headers for debugging
+http --print=Hh pie.dev/get
+
+# Everything including metadata
+http --print=HBhbm pie.dev/get
+```
+
+**Interaction with `--quiet`:**
+
+The `--quiet, -q` flag suppresses all output and overrides `--print`:
+
+```bash
+# No output (--quiet takes precedence)
+http --quiet --print=hb pie.dev/get
+```
+
+
 Print request and response headers:
 
 ```bash
