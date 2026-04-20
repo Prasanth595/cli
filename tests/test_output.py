@@ -662,7 +662,6 @@ class TestPrintFlag:
         r = http('--offline', f'--print={print_flags}', httpbin + '/get')
         # Check for presence of request indicators
         has_request_headers = 'GET /get' in r or 'Accept:' in r
-        has_request_body = 'hello' in r  # general check
         # Check for response indicators
         has_response_headers = '200 OK' in r or 'Content-Type:' in r
         has_response_body = '{' in r or '}' in r or '[' in r
