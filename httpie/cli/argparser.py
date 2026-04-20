@@ -22,7 +22,7 @@ from .constants import (
     SEPARATOR_CREDENTIALS,
     SEPARATOR_GROUP_ALL_ITEMS, SEPARATOR_GROUP_DATA_ITEMS, URL_SCHEME_RE,
 )
-from .exceptions import ParseError
+from .exceptions import ParseError, JSONParseError
 from .requestitems import RequestItems
 from ..context import Environment
 from ..plugins.registry import plugin_manager
@@ -456,6 +456,10 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
                 request_item_args=self.args.request_items,
                 request_type=self.args.request_type,
             )
+        except JSONParseError as e:
+            if self.args.traceback:
+                raise
+            self.error(f'[red]{e.args[0]}[/red]')
         except ParseError as e:
             if self.args.traceback:
                 raise
