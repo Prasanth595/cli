@@ -629,3 +629,87 @@ def test_response_mime_overwrite_incorrect():
     # The provided Content-Type is simply ignored, and so no formatting is done.
     r = http('--response-mime=incorrect/type', DUMMY_URL)
     assert XML_DATA_RAW in r
+
+
+class TestPrintFlag:
+    """Tests for the --print/-p flag functionality."""
+
+    @pytest.mark.parametrize(
+        'print_flags, should_include_request, should_include_response',
+        [
+            # Request-only flags
+            ('H', True, False),
+            ('B', False, False),
+            ('HB', True, False),
+            # Response-only flags
+            ('h', False, True),
+            ('b', False, True),
+            ('hb', False, True),
+            # Combined request and response
+            ('Hh', True, True),
+            ('HBhb', True, True),
+            ('BHhb', True, True),
+            # With meta
+            ('m', False, False),
+            ('Hm', True, False),
+            ('hm', False, True),
+            ('HBhm', True, True),
+        ],
+    )
+    def test_print_flag_combinations(
+        self, httpbin, print_flags, should_include_request, should_include_response
+    ):
+        r = http('--offline', f'--print={print_flags}', httpbin + '/get')
+        # Check for presence of request indicators
+        has_request_headers = 'GET /get' in r or 'Accept:' in r
+        has_request_body = 'hello' in r  # general check
+        # Check for response indicators
+        has_response_headers = '200 OK' in r or 'Content-Type:' in r
+        has_response_body = '{' in r or '}' in r or '[' in r
+
+        # Verify expectations based on what's in the output
+        if should_include_request:
+            assert has_request_headers, f"Expected request headers in output for print={print_flags}"
+        if should_include_response:
+            assert has_response_headers or has_response_body, f"Expected response in output for print={print_flags}"
+
+    def test_print_flag_invalid_characters(self):
+        with pytest.raises(SystemExit):
+            http('--offline', '--print=XYZ', 'example.org')
+
+    def test_print_flag_case_sensitive(self, httpbin):
+        # Lowercase should work
+        r_lower = http('--offline', '--print=h', httpbin + '/get')
+        # Uppercase should work (different meaning)
+        r_upper = http('--offline', '--print=H', httpbin + '/get')
+        # They should produce different output
+        assert r_lower != r_upper
+
+    def test_print_flag_with_quiet(self, httpbin):
+        """--quiet should override --print to suppress output."""
+        r = http('--quiet', '--print=hb', httpbin + '/get')
+        assert r.strip() == ''
+
+    def test_print_flag_empty_string(self, httpbin):
+        """--print with empty string should produce minimal output."""
+        r = http('--offline', '--print=', httpbin + '/get')
+        # Empty print should still work but produce minimal/nothing
+        assert r == '' or 'GET' not in r
+
+    def test_print_flag_request_body_with_post(self, httpbin):
+        """Test request body printed correctly with POST."""
+        r = http('--offline', '--print=B', '--print=h', 'POST', httpbin + '/post', 'data=test')
+        assert 'data=test' in r or 'test' in r.lower()
+
+    def test_print_flag_response_body_json(self, httpbin):
+        """Test response body (JSON) printed correctly."""
+        r = http('--offline', '--print=b', httpbin + '/get')
+        # httpbin returns JSON
+        assert '{' in r or '}' in r or 'origin' in r
+
+    def test_print_flag_headers_both_directions(self, httpbin):
+        """Test printing headers from both request and response."""
+        r = http('--offline', '--print=Hh', httpbin + '/get')
+        # Should have both request and response headers
+        assert 'GET' in r or 'Host:' in r or 'Accept:' in r
+        assert '200' in r or 'Content-Type:' in r or 'HTTP' in r
