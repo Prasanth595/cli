@@ -1,3 +1,4 @@
+import json
 import os
 import functools
 from typing import Callable, Dict, IO, List, Optional, Tuple, Union
@@ -16,7 +17,7 @@ from .dicts import (
     RequestFilesDict, HTTPHeadersDict, RequestJSONDataDict,
     RequestQueryParamsDict,
 )
-from .exceptions import ParseError
+from .exceptions import ParseError, JSONParseError
 from .nested_json import interpret_nested_json
 from ..utils import get_content_type, load_json_preserve_order_and_dupe_keys, split_iterable
 
@@ -226,5 +227,7 @@ def load_text_file(item: KeyValueArg) -> str:
 def load_json(arg: KeyValueArg, contents: str) -> JSONType:
     try:
         return load_json_preserve_order_and_dupe_keys(contents)
+    except (json.JSONDecodeError, RecursionError, UnicodeDecodeError) as e:
+        raise JSONParseError('JSON 格式解析失败，请检查文件编码与嵌套层级')
     except ValueError as e:
         raise ParseError(f'{arg.orig!r}: {e}')
