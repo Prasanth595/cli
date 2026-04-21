@@ -63,7 +63,7 @@ def collect_messages(
         base_headers=httpie_session_headers,
         request_body_read_callback=request_body_read_callback
     )
-    send_kwargs = make_send_kwargs(args)
+    send_kwargs = make_send_kwargs(args, env)
     send_kwargs_mergeable_from_env = make_send_kwargs_mergeable_from_env(args)
     requests_session = build_requests_session(
         ssl_version=args.ssl_version,
@@ -278,9 +278,12 @@ def make_default_headers(args: argparse.Namespace) -> HTTPHeadersDict:
     return default_headers
 
 
-def make_send_kwargs(args: argparse.Namespace) -> dict:
+def make_send_kwargs(args: argparse.Namespace, env: Environment = None) -> dict:
+    timeout = args.timeout or None
+    if timeout is None and env is not None and env.config.default_timeout:
+        timeout = env.config.default_timeout
     return {
-        'timeout': args.timeout or None,
+        'timeout': timeout,
         'allow_redirects': False,
     }
 
@@ -343,6 +346,9 @@ def make_request_kwargs(
     headers = make_default_headers(args)
     if base_headers:
         headers.update(base_headers)
+    # Apply default headers from config (can be overridden by user)
+    if env.config.default_headers:
+        headers.update(env.config.default_headers)
     headers.update(args.headers)
     if args.offline and args.chunked and 'Transfer-Encoding' not in headers:
         # When online, we let requests set the header instead to be able more
