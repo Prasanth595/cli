@@ -599,15 +599,18 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
         """Prints a usage message incorporating the message to stderr and
         exits."""
         self.print_usage(sys.stderr)
-        self.env.rich_error_console.print(
-            dedent(
-                f'''
-                [bold]error[/bold]:
-                    {message}
+        message = message.strip()
 
-                [bold]for more information[/bold]:
-                    run '{self.prog} --help' or visit https://httpie.io/docs/cli
-                '''.rstrip()
+        if "REQUEST_ITEM" in message:
+            message += (
+                "\n\nHint: If your value contains spaces, quote it.\n"
+                "Example: name='Foo Bar'"
             )
+
+        self.env.rich_error_console.print(
+            f"[bold]error[/bold]:\n  {message}\n\n"
+            f"[bold]for more information[/bold]:\n"
+            f"  run '{self.prog} --help' or visit https://httpie.io/docs/cli"
         )
+
         self.exit(2)
