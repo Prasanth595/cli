@@ -1,0 +1,25 @@
+# Bug-fix harness configuration.
+# Committed to the repo so teammates share the same setup.
+# Generated 2026-04-27 by install-harness. Edit freely.
+
+default_branch = "master"
+tracker = "github"
+
+[gates]
+# Command to run all tests. Empty = gates/tests.sh tries auto-detection at runtime.
+tests = "make test"
+
+# Typecheck command (optional). Empty = skip gate.
+typecheck = ""
+
+[regressions]
+# strategy: "top_level" (all in tests/regressions/) or "per_service" (scoped to affected dir)
+strategy = "top_level"
+# template placeholders: {n}=bug number, {slug}=slug, {service}=service dir (per_service only)
+template = "tests/regressions/test_BUG-{n}_{slug}.py"
+
+[labels]
+# Applied to issues eligible for harness pickup
+bug = "bug"
+# Applied to PRs/MRs that need human review
+review = "needs-review"

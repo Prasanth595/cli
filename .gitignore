@@ -153,3 +153,6 @@ dmypy.json
 *.nupkg
 
 artifacts/
+
+# bug-fix harness
+.worktrees/
