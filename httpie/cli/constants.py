@@ -41,14 +41,6 @@ SEPARATORS_GROUP_MULTIPART = frozenset({
     SEPARATOR_FILE_UPLOAD,
 })
 
-# Separators for items whose value is a filename to be embedded
-SEPARATOR_GROUP_DATA_EMBED_ITEMS = frozenset({
-    SEPARATOR_HEADER_EMBED,
-    SEPARATOR_QUERY_EMBED_FILE,
-    SEPARATOR_DATA_EMBED_FILE_CONTENTS,
-    SEPARATOR_DATA_EMBED_RAW_JSON_FILE,
-})
-
 # Separators for nested JSON items
 SEPARATOR_GROUP_NESTED_JSON_ITEMS = frozenset([
     SEPARATOR_DATA_STRING,

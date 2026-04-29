@@ -77,50 +77,6 @@ def repr_dict(d: dict) -> str:
     return pformat(d)
 
 
-def humanize_bytes(n, precision=2):
-    # Author: Doug Latornell
-    # Licence: MIT
-    # URL: https://code.activestate.com/recipes/577081/
-    """Return a humanized string representation of a number of bytes.
-
-    >>> humanize_bytes(1)
-    '1 B'
-    >>> humanize_bytes(1024, precision=1)
-    '1.0 kB'
-    >>> humanize_bytes(1024 * 123, precision=1)
-    '123.0 kB'
-    >>> humanize_bytes(1024 * 12342, precision=1)
-    '12.1 MB'
-    >>> humanize_bytes(1024 * 12342, precision=2)
-    '12.05 MB'
-    >>> humanize_bytes(1024 * 1234, precision=2)
-    '1.21 MB'
-    >>> humanize_bytes(1024 * 1234 * 1111, precision=2)
-    '1.31 GB'
-    >>> humanize_bytes(1024 * 1234 * 1111, precision=1)
-    '1.3 GB'
-
-    """
-    abbrevs = [
-        (1 << 50, 'PB'),
-        (1 << 40, 'TB'),
-        (1 << 30, 'GB'),
-        (1 << 20, 'MB'),
-        (1 << 10, 'kB'),
-        (1, 'B')
-    ]
-
-    if n == 1:
-        return '1 B'
-
-    for factor, suffix in abbrevs:
-        if n >= factor:
-            break
-
-    # noinspection PyUnboundLocalVariable
-    return f'{n / factor:.{precision}f} {suffix}'
-
-
 class ExplicitNullAuth(requests.auth.AuthBase):
     """Forces requests to ignore the ``.netrc``.
     <https://github.com/psf/requests/issues/2773#issuecomment-174312831>
