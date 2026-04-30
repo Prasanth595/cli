@@ -315,6 +315,24 @@ class TestArgumentParser:
             KeyValueArg(
                 key='old_item', value='b', sep='=', orig='old_item=b'),
         ]
+    
+    def test_guess_when_method_set_and_url_in_request_items(self):
+        """Regression test for https://github.com/httpie/cli/issues/1614.
+        When optional flags appear between METHOD and URL, argparse can
+        land the URL in request_items. _guess_method should recover gracefully.
+        """
+        self.parser.args = argparse.Namespace()
+        self.parser.args.method = 'POST'
+        self.parser.args.url = None           # url not yet parsed
+        self.parser.args.request_items = ['https://example.org']  # URL ended up here
+        self.parser.args.ignore_stdin = False
+        self.parser.env = MockEnvironment()
+
+        self.parser._guess_method()
+
+        assert self.parser.args.method == 'POST'
+        assert self.parser.args.url == 'https://example.org'
+        assert self.parser.args.request_items == []
 
 
 class TestNoOptions:
