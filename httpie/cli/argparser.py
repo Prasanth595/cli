@@ -413,7 +413,16 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
         """
         if self.args.method is None:
             # Invoked as `http URL'.
-            assert not self.args.request_items
+            if self.args.request_items and self.args.url is None:
+        # Promote what argparse put in request_items[0] as the URL.
+                self.args.url = self.args.request_items.pop(0)
+            elif self.args.request_items:
+        # url is already set AND request_items is non-empty: genuine error.
+                self.error(
+            "Could not determine the request URL. "
+            "Make sure the URL comes directly after the HTTP method:\n"
+            f"  http {self.args.method} URL [REQUEST_ITEM ...]"
+        )
             if self.has_input_data:
                 self.args.method = HTTP_POST
             else:
