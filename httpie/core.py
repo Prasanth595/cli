@@ -1,13 +1,15 @@
 import argparse
+import base64
 import io
 import json
 import os
 import platform
 import sys
 import socket
+import tempfile
 from datetime import datetime, timezone
 from time import monotonic
-from typing import List, Optional, Union, Callable
+from typing import Any, Dict, List, Optional, Union, Callable
 
 import requests
 from pygments import __version__ as pygments_version
@@ -174,41 +176,81 @@ def main(
 
 
 
+def _normalize_headers(headers: Dict[str, Any]) -> Dict[str, str]:
+    normalized = {}
+    for key, value in headers.items():
+        key_str = str(key)
+        if isinstance(value, bytes):
+            normalized[key_str] = value.decode('utf-8', errors='replace')
+        elif isinstance(value, str):
+            normalized[key_str] = value
+        else:
+            normalized[key_str] = str(value)
+    return normalized
+
+
+def _serialize_request_body(body: Any) -> Dict[str, str]:
+    result = {}
+    if body is None:
+        return result
+    
+    if isinstance(body, bytes):
+        try:
+            result['body'] = body.decode('utf-8', errors='replace')
+        except Exception:
+            result['body_base64'] = base64.b64encode(body).decode('ascii')
+    elif isinstance(body, str):
+        result['body'] = body
+    elif isinstance(body, dict):
+        try:
+            result['body'] = json.dumps(body, ensure_ascii=False, default=str)
+        except Exception:
+            result['body'] = str(body)
+    else:
+        try:
+            result['body'] = str(body)
+        except Exception:
+            pass
+    
+    return result
+
+
 def _collect_metadata(
     initial_request: Optional[requests.PreparedRequest],
     final_response: Optional[requests.Response],
     response_body_preview: Optional[bytes],
+    args: Optional[argparse.Namespace] = None,
 ) -> dict:
     metadata = {
         'timestamp': datetime.now(timezone.utc).isoformat(),
     }
 
     if initial_request:
-        metadata['request'] = {
+        request_data = {
             'method': initial_request.method,
             'url': initial_request.url,
-            'headers': dict(initial_request.headers),
+            'headers': _normalize_headers(dict(initial_request.headers)),
         }
-        if initial_request.body is not None:
-            if isinstance(initial_request.body, bytes):
-                try:
-                    metadata['request']['body'] = initial_request.body.decode('utf-8', errors='replace')
-                except Exception:
-                    metadata['request']['body_base64'] = initial_request.body.hex()
-            elif isinstance(initial_request.body, str):
-                metadata['request']['body'] = initial_request.body
+        
+        if hasattr(args, 'data') and args.data is not None:
+            request_data.update(_serialize_request_body(args.data))
+        elif initial_request.body is not None:
+            request_data.update(_serialize_request_body(initial_request.body))
+        
+        metadata['request'] = request_data
 
     if final_response:
         metadata['response'] = {
             'status_code': final_response.status_code,
-            'headers': dict(final_response.headers),
+            'headers': _normalize_headers(dict(final_response.headers)),
         }
 
         if response_body_preview:
+            preview_bytes = response_body_preview[:1024]
             try:
-                metadata['response']['body_preview'] = response_body_preview.decode('utf-8', errors='replace')
+                metadata['response']['body_preview'] = preview_bytes.decode('utf-8', errors='replace')
             except Exception:
-                metadata['response']['body_preview_hex'] = response_body_preview.hex()
+                metadata['response']['body_preview_base64'] = base64.b64encode(preview_bytes).decode('ascii')
 
         try:
             time_to_parse_headers = final_response.elapsed.total_seconds()
@@ -225,7 +267,9 @@ def _collect_metadata(
 
 
 def _save_metadata_to_file(filepath: str, metadata: dict) -> None:
+    filepath = os.path.abspath(filepath)
     records = []
+    
     if os.path.exists(filepath):
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
@@ -234,13 +278,31 @@ def _save_metadata_to_file(filepath: str, metadata: dict) -> None:
                     records = json.loads(content)
                     if not isinstance(records, list):
                         records = [records]
-        except (json.JSONDecodeError, IOError):
+        except (json.JSONDecodeError, IOError, OSError):
             records = []
 
     records.append(metadata)
-
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(records, f, indent=2, ensure_ascii=False, default=str)
+    
+    temp_fd, temp_path = tempfile.mkstemp(
+        dir=os.path.dirname(filepath) or '.',
+        prefix='.httpie_meta_',
+        suffix='.tmp'
+    )
+    try:
+        with os.fdopen(temp_fd, 'w', encoding='utf-8') as f:
+            json.dump(records, f, indent=2, ensure_ascii=False, default=str)
+        
+        if os.path.exists(filepath):
+            os.replace(temp_path, filepath)
+        else:
+            os.rename(temp_path, filepath)
+    except Exception:
+        if os.path.exists(temp_path):
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+        raise
 
 
 def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
@@ -373,6 +435,7 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
                 initial_request=initial_request,
                 final_response=final_response,
                 response_body_preview=response_body_preview,
+                args=args,
             )
             _save_metadata_to_file(args.save_meta, metadata)
 

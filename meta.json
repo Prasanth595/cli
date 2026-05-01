@@ -1,31 +1,282 @@
 [
   {
-    "timestamp": "2026-05-01T16:58:19.785934+00:00",
+    "timestamp": "2026-05-01T17:16:03.339459+00:00",
     "request": {
-      "method": "POST",
-      "url": "http://httpbin.org/post",
+      "method": "GET",
+      "url": "http://httpbin.org/get",
       "headers": {
         "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
         "Connection": "keep-alive",
-        "Content-Length": "4",
-        "User-Agent": "b'HTTPie/3.2.4'",
-        "Accept": "b'application/json, */*;q=0.5'",
-        "Content-Type": "b'application/octet-stream'"
-      }
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
     },
     "response": {
       "status_code": 200,
       "headers": {
-        "Date": "Fri, 01 May 2026 16:58:19 GMT",
+        "Date": "Fri, 01 May 2026 17:16:02 GMT",
         "Content-Type": "application/json",
-        "Content-Length": "512",
+        "Content-Length": "302",
         "Connection": "keep-alive",
         "Server": "gunicorn/19.9.0",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": "true"
       },
-      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"data\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"data:application/octet-stream;base64,gIGCgw==\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"files\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"form\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"application/json, */*;q=0.5\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Content-Length\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Content-Type\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"application/octet-stream\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;",
-      "total_time_seconds": 0.627475
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd2-58221a7224969a66429ba81e\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.03722
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:03.374722+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:02 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd2-4588e3c4763f74bf519c11b2\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.007199
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:03.497895+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:03 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd3-62db9068744ac31e344b8fba\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 0.845511
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:03.587212+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:02 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd2-64a233a91410c3e410c40376\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.043946
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:03.640225+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:02 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd2-182452d90f772c7002049426\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.170372
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:03.746734+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:03 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd3-64aed2d75c75beb409d668a4\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.132757
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:03.872653+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:03 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd3-626b5f551ccfd4a5718c7a68\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.17417
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:04.038689+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:03 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd3-5a6b24e075b6190676176438\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.269929
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:04.116152+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:03 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd3-0bcc65d63ac3281b36035786\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.409183
+    }
+  },
+  {
+    "timestamp": "2026-05-01T17:16:04.319557+00:00",
+    "request": {
+      "method": "GET",
+      "url": "http://httpbin.org/get",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "User-Agent": "HTTPie/3.2.4"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 17:16:04 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "302",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"*/*\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"httpbin.org\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"User-Agent\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"HTTPie/3.2.4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"X-Amzn-Trace-Id\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"Root=1-69f4dfd4-4fda16ab62b364a210987c3c\"\u001b[39;49;00m\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"origin\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"183.202.201.211\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"url\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"http://httpbin.o",
+      "total_time_seconds": 1.566505
     }
   }
 ]
