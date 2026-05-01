@@ -1,0 +1,31 @@
+[
+  {
+    "timestamp": "2026-05-01T16:58:19.785934+00:00",
+    "request": {
+      "method": "POST",
+      "url": "http://httpbin.org/post",
+      "headers": {
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "Content-Length": "4",
+        "User-Agent": "b'HTTPie/3.2.4'",
+        "Accept": "b'application/json, */*;q=0.5'",
+        "Content-Type": "b'application/octet-stream'"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "Date": "Fri, 01 May 2026 16:58:19 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "512",
+        "Connection": "keep-alive",
+        "Server": "gunicorn/19.9.0",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "body_preview": "{\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"args\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"data\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"data:application/octet-stream;base64,gIGCgw==\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"files\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"form\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{},\u001b[37m\u001b[39;49;00m\n\u001b[37m    \u001b[39;49;00m\u001b[94m\"headers\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m{\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"application/json, */*;q=0.5\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Accept-Encoding\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"gzip, deflate, br\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Content-Length\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"4\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Content-Type\"\u001b[39;49;00m:\u001b[37m \u001b[39;49;00m\u001b[33m\"application/octet-stream\"\u001b[39;49;00m,\u001b[37m\u001b[39;49;00m\n\u001b[37m        \u001b[39;49;00m\u001b[94m\"Host\"\u001b[39;49;",
+      "total_time_seconds": 0.627475
+    }
+  }
+]

@@ -1,8 +1,12 @@
 import argparse
+import io
+import json
 import os
 import platform
 import sys
 import socket
+from datetime import datetime, timezone
+from time import monotonic
 from typing import List, Optional, Union, Callable
 
 import requests
@@ -167,6 +171,78 @@ def main(
     )
 
 
+
+
+
+def _collect_metadata(
+    initial_request: Optional[requests.PreparedRequest],
+    final_response: Optional[requests.Response],
+    response_body_preview: Optional[bytes],
+) -> dict:
+    metadata = {
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+    }
+
+    if initial_request:
+        metadata['request'] = {
+            'method': initial_request.method,
+            'url': initial_request.url,
+            'headers': dict(initial_request.headers),
+        }
+        if initial_request.body is not None:
+            if isinstance(initial_request.body, bytes):
+                try:
+                    metadata['request']['body'] = initial_request.body.decode('utf-8', errors='replace')
+                except Exception:
+                    metadata['request']['body_base64'] = initial_request.body.hex()
+            elif isinstance(initial_request.body, str):
+                metadata['request']['body'] = initial_request.body
+
+    if final_response:
+        metadata['response'] = {
+            'status_code': final_response.status_code,
+            'headers': dict(final_response.headers),
+        }
+
+        if response_body_preview:
+            try:
+                metadata['response']['body_preview'] = response_body_preview.decode('utf-8', errors='replace')
+            except Exception:
+                metadata['response']['body_preview_hex'] = response_body_preview.hex()
+
+        try:
+            time_to_parse_headers = final_response.elapsed.total_seconds()
+            if hasattr(final_response, '_httpie_headers_parsed_at'):
+                time_since_headers_parsed = monotonic() - final_response._httpie_headers_parsed_at
+                total_time = time_to_parse_headers + time_since_headers_parsed
+            else:
+                total_time = time_to_parse_headers
+            metadata['response']['total_time_seconds'] = round(total_time, 6)
+        except Exception:
+            pass
+
+    return metadata
+
+
+def _save_metadata_to_file(filepath: str, metadata: dict) -> None:
+    records = []
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+                if content.strip():
+                    records = json.loads(content)
+                    if not isinstance(records, list):
+                        records = [records]
+        except (json.JSONDecodeError, IOError):
+            records = []
+
+    records.append(metadata)
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(records, f, indent=2, ensure_ascii=False, default=str)
+
+
 def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
     """
     The main program without error handling.
@@ -177,6 +253,7 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
     downloader = None
     initial_request: Optional[requests.PreparedRequest] = None
     final_response: Optional[requests.Response] = None
+    response_body_preview: Optional[bytes] = None
     processing_options = ProcessingOptions.from_raw_args(args)
 
     def separate():
@@ -231,13 +308,29 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
                     exit_status = http_status_to_exit_status(http_status=message.status_code, follow=args.follow)
                     if exit_status != ExitStatus.SUCCESS and (not env.stdout_isatty or args.quiet == 1):
                         env.log_error(f'HTTP {message.raw.status} {message.raw.reason}', level=LogLevel.WARNING)
+            
+            extra_stream_kwargs = None
+            if args.save_meta and not args.offline and output_options.kind is RequestsMessageKind.RESPONSE:
+                def response_body_chunk_callback(chunk: bytes):
+                    nonlocal response_body_preview
+                    if response_body_preview is None:
+                        response_body_preview = b''
+                    if len(response_body_preview) < 1024:
+                        remaining = 1024 - len(response_body_preview)
+                        response_body_preview += chunk[:remaining]
+                
+                extra_stream_kwargs = {
+                    'on_body_chunk_downloaded': response_body_chunk_callback
+                }
+            
             write_message(
                 requests_message=message,
                 env=env,
                 output_options=output_options._replace(
                     body=do_write_body
                 ),
-                processing_options=processing_options
+                processing_options=processing_options,
+                extra_stream_kwargs=extra_stream_kwargs
             )
             prev_with_body = output_options.body
 
@@ -250,6 +343,22 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
                 initial_url=initial_request.url,
                 final_response=final_response,
             )
+            
+            if args.save_meta and not args.offline:
+                original_callback = download_stream.on_body_chunk_downloaded
+                
+                def download_chunk_callback(chunk: bytes):
+                    nonlocal response_body_preview
+                    if response_body_preview is None:
+                        response_body_preview = b''
+                    if len(response_body_preview) < 1024:
+                        remaining = 1024 - len(response_body_preview)
+                        response_body_preview += chunk[:remaining]
+                    if original_callback:
+                        original_callback(chunk)
+                
+                download_stream.on_body_chunk_downloaded = download_chunk_callback
+            
             write_stream(stream=download_stream, outfile=download_to, flush=False)
             downloader.finish()
             if downloader.interrupted:
@@ -258,6 +367,15 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
                     f'Incomplete download: size={downloader.status.total_size};'
                     f' downloaded={downloader.status.downloaded}'
                 )
+
+        if args.save_meta:
+            metadata = _collect_metadata(
+                initial_request=initial_request,
+                final_response=final_response,
+                response_body_preview=response_body_preview,
+            )
+            _save_metadata_to_file(args.save_meta, metadata)
+
         return exit_status
 
     finally:

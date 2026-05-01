@@ -536,6 +536,23 @@ output_options.add_argument(
 )
 
 output_options.add_argument(
+    '--save-meta',
+    metavar='FILE',
+    dest='save_meta',
+    default=None,
+    short_help='Save request and response metadata to FILE as JSON.',
+    help="""
+    Save request and response metadata to FILE as JSON. The metadata includes:
+    - Request: method, URL, headers, body (if any)
+    - Response: status code, headers, body (first 1024 bytes), total time (seconds)
+    
+    If the file already exists, the new metadata is appended to the JSON array.
+    This option does not conflict with --output or --download.
+    
+    """,
+)
+
+output_options.add_argument(
     '--download',
     '-d',
     action='store_true',
