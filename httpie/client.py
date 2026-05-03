@@ -344,6 +344,12 @@ def make_request_kwargs(
     if base_headers:
         headers.update(base_headers)
     headers.update(args.headers)
+    # Ensure Content-Type is set for JSON requests even if user headers
+    # were provided. This fixes the case where a single custom header
+    # prevents the default Content-Type from being preserved.
+    # See: https://github.com/httpie/cli/issues/1834
+    if auto_json and 'Content-Type' not in headers:
+        headers['Content-Type'] = JSON_CONTENT_TYPE
     if args.offline and args.chunked and 'Transfer-Encoding' not in headers:
         # When online, we let requests set the header instead to be able more
         # easily verify chunking is taking place.
