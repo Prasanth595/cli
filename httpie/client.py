@@ -333,17 +333,17 @@ def make_request_kwargs(
 
     """
     files = args.files
-    # Serialize JSON data, if needed.
     data = args.data
     auto_json = data and not args.form
     if (args.json or auto_json) and isinstance(data, dict):
         data = json_dict_to_request_body(data)
 
-    # Finalize headers.
     headers = make_default_headers(args)
+
+    headers.update(args.headers)
+
     if base_headers:
         headers.update(base_headers)
-    headers.update(args.headers)
     if args.offline and args.chunked and 'Transfer-Encoding' not in headers:
         # When online, we let requests set the header instead to be able more
         # easily verify chunking is taking place.
