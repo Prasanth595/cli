@@ -7,7 +7,7 @@ import os
 import re
 from mailbox import Message
 from time import monotonic
-from typing import IO, Optional, Tuple
+from typing import IO, Mapping, Optional, Tuple
 from urllib.parse import urlsplit
 
 import requests
@@ -22,6 +22,22 @@ PARTIAL_CONTENT = 206
 
 class ContentRangeError(ValueError):
     pass
+
+
+def has_content_encoding(headers: Mapping[str, str]) -> bool:
+    content_encoding = headers.get('Content-Encoding', '')
+    return any(
+        coding.strip().lower() != 'identity'
+        for coding in content_encoding.split(',')
+        if coding.strip()
+    )
+
+
+def get_raw_body_bytes_read(response: requests.Response) -> Optional[int]:
+    try:
+        return response.raw.tell()
+    except AttributeError:
+        return None
 
 
 def parse_content_range(content_range: str, resumed_from: int) -> int:
@@ -182,6 +198,8 @@ class Downloader:
         self._output_file = output_file
         self._resume = resume
         self._resumed_from = 0
+        self._raw_body_bytes_read = None
+        self._downloaded_size_getter = None
 
     def pre_request(self, request_headers: dict):
         """Called just before the HTTP request is sent.
@@ -251,6 +269,15 @@ class Downloader:
             on_body_chunk_downloaded=self.chunk_downloaded,
         )
 
+        if has_content_encoding(final_response.headers):
+            self._raw_body_bytes_read = get_raw_body_bytes_read(final_response)
+            if self._raw_body_bytes_read is None:
+                total_size = None
+            else:
+                self._downloaded_size_getter = (
+                    lambda: get_raw_body_bytes_read(final_response)
+                )
+
         self.status.started(
             output_file=self._output_file,
             resumed_from=self._resumed_from,
@@ -283,7 +310,13 @@ class Downloader:
                       been downloaded and written to the output.
 
         """
-        self.status.chunk_downloaded(len(chunk))
+        size = len(chunk)
+        if self._downloaded_size_getter:
+            raw_body_bytes_read = self._downloaded_size_getter()
+            if raw_body_bytes_read is not None:
+                size = raw_body_bytes_read - self._raw_body_bytes_read
+                self._raw_body_bytes_read = raw_body_bytes_read
+        self.status.chunk_downloaded(size)
 
     @staticmethod
     def _get_output_file_from_response(
