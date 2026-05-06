@@ -17,10 +17,20 @@ from .utils import http, MockEnvironment
 
 class Response(requests.Response):
     # noinspection PyDefaultArgument
-    def __init__(self, url, headers={}, status_code=200):
+    def __init__(self, url, headers={}, status_code=200, raw=None):
         self.url = url
         self.headers = CaseInsensitiveDict(headers)
         self.status_code = status_code
+        self.raw = raw
+
+
+class RawResponse:
+
+    def __init__(self):
+        self.body_bytes_read = 0
+
+    def tell(self):
+        return self.body_bytes_read
 
 
 class TestDownloadUtils:
@@ -200,6 +210,27 @@ class TestDownloads:
             downloader.chunk_downloaded(b'1234')
             downloader.finish()
             assert downloader.interrupted
+
+    def test_download_with_encoded_Content_Length(self, mock_env):
+        raw = RawResponse()
+        with open(os.devnull, 'w') as devnull:
+            downloader = Downloader(mock_env, output_file=devnull)
+            downloader.start(
+                final_response=Response(
+                    url='http://example.org/',
+                    headers={
+                        'Content-Encoding': 'gzip',
+                        'Content-Length': 5,
+                    },
+                    raw=raw,
+                ),
+                initial_url='/'
+            )
+            raw.body_bytes_read = 5
+            downloader.chunk_downloaded(b'1234567890')
+            downloader.finish()
+            assert downloader.status.downloaded == 5
+            assert not downloader.interrupted
 
     def test_download_resumed(self, mock_env, httpbin_both):
         with tempfile.TemporaryDirectory() as tmp_dirname:
