@@ -31,7 +31,7 @@ def httpbin_add_ca_bundle(monkeypatch):
     """
     Make pytest-httpbin's CA trusted by default.
 
-    (Same as `httpbin_ca_bundle`, just auto-used.).
+    (Same as `httpbin_ca_bundle`, just auto-used.)
 
     """
     monkeypatch.setenv('REQUESTS_CA_BUNDLE', certs.where())

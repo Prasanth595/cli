@@ -128,10 +128,10 @@ def find_reporters(since: str, until: str) -> GitHubLogins:
 
 def merge_all_the_people(release: str, contributors: People, committers: FullNames, reporters: GitHubLogins) -> None:
     """
-    >>> contributors = {'Alice': new_person(github='alice', twitter='alice')}
+    >>> contributors = {'John': new_person(github='john', twitter='john')}
     >>> merge_all_the_people('2.6.0', contributors, {}, {})
     >>> contributors
-    {'Alice': {'committed': [], 'reported': [], 'github': 'alice', 'twitter': 'alice'}}
+    {'John': {'committed': [], 'reported': [], 'github': 'john', 'twitter': 'john'}}
 
     >>> contributors = {'Bob': new_person(github='bob', twitter='bob')}
     >>> merge_all_the_people('2.6.0', contributors, {'Bob'}, {'bob'})

@@ -150,7 +150,16 @@ def split_cookies(cookies):
     """
     if not cookies:
         return []
-    return RE_COOKIE_SPLIT.split(cookies)
+
+    if ', ' in cookies:
+        cookie_header = cookies.strip()
+        return RE_COOKIE_SPLIT.split(cookie_header)
+
+    if ',' in cookies:
+        cookie_header = cookies.strip()
+        return RE_COOKIE_SPLIT.split(cookie_header)
+
+    return [cookies.strip()]
 
 
 def get_expired_cookies(
@@ -175,14 +184,34 @@ def get_expired_cookies(
 
     _max_age_to_expires(cookies=cookies, now=now)
 
-    return [
-        {
-            'name': cookie['name'],
-            'path': cookie.get('path', '/')
-        }
-        for cookie in cookies
-        if is_expired(expires=cookie.get('expires'))
-    ]
+    expired_cookies = []
+    for cookie in cookies:
+        expires = cookie.get('expires')
+        if is_expired(expires=expires):
+            if cookie.get('path'):
+                expired_cookies.append({
+                    'name': cookie['name'],
+                    'path': cookie.get('path', '/')
+                })
+            else:
+                expired_cookies.append({
+                    'name': cookie['name'],
+                    'path': '/'
+                })
+        elif expires is None:
+            if cookie.get('max-age') == '0':
+                if cookie.get('path'):
+                    expired_cookies.append({
+                        'name': cookie['name'],
+                        'path': cookie.get('path', '/')
+                    })
+                else:
+                    expired_cookies.append({
+                        'name': cookie['name'],
+                        'path': '/'
+                    })
+
+    return expired_cookies
 
 
 def _max_age_to_expires(cookies, now):

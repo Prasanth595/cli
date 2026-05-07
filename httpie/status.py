@@ -18,8 +18,6 @@ class ExitStatus(IntEnum):
     # 128+2 SIGINT
     # <http://www.tldp.org/LDP/abs/html/exitcodes.html>
     ERROR_CTRL_C = 130
-
-
 def http_status_to_exit_status(http_status: int, follow=False) -> ExitStatus:
     """
     Translate HTTP status code to exit status code.
