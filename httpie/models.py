@@ -19,6 +19,14 @@ from .utils import split_cookies, parse_content_type_header
 
 ELAPSED_TIME_LABEL = 'Elapsed time'
 
+# Default ports stripped from the displayed `Host` header to match what
+# `http.client` actually sends on the wire (it omits the port when it
+# matches the scheme's default).
+DEFAULT_PORTS_BY_SCHEME = {
+    'http': 80,
+    'https': 443,
+}
+
 
 class HTTPMessage:
     """Abstract class for HTTP messages."""
@@ -148,7 +156,7 @@ class HTTPRequest(HTTPMessage):
 
         headers = self._orig.headers.copy()
         if 'Host' not in self._orig.headers:
-            headers['Host'] = url.netloc.split('@')[-1]
+            headers['Host'] = _build_host_header(url)
 
         headers = [
             f'{name}: {value if isinstance(value, str) else value.decode()}'
@@ -167,6 +175,30 @@ class HTTPRequest(HTTPMessage):
             # Happens with JSON/form request data parsed from the command line.
             body = body.encode()
         return body or b''
+
+
+def _build_host_header(url) -> str:
+    """Return the displayed `Host` header for a URL.
+
+    Mirrors `http.client`'s behavior of omitting the port when it equals the
+    scheme's default, so `--print hH` matches the bytes actually sent on
+    the wire.
+    """
+    netloc = url.netloc.split('@')[-1]
+    default_port = DEFAULT_PORTS_BY_SCHEME.get(url.scheme)
+    if default_port is not None:
+        try:
+            port = url.port
+        except ValueError:
+            # Malformed port — leave the netloc as-is.
+            port = None
+        if port == default_port:
+            # Strip the trailing `:<default_port>` while preserving any
+            # IPv6 brackets and host casing in `netloc`.
+            suffix = f':{default_port}'
+            if netloc.endswith(suffix):
+                netloc = netloc[: -len(suffix)]
+    return netloc
 
 
 RequestsMessage = Union[requests.PreparedRequest, requests.Response]
