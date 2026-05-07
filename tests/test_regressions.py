@@ -19,6 +19,40 @@ def test_Host_header_overwrite(httpbin):
     assert f'host: {host}' in r
 
 
+@pytest.mark.parametrize(
+    'url, expected_host',
+    [
+        # Default ports must be stripped from the displayed Host
+        # header to match what `http.client` actually sends on the
+        # wire (it omits the port when it equals the scheme default).
+        ('http://localhost:80/', 'localhost'),
+        ('https://example.com:443/', 'example.com'),
+        # Userinfo should not appear in Host either way.
+        ('http://user:pass@localhost:80/', 'localhost'),
+        # Non-default ports must be preserved.
+        ('http://localhost:8080/', 'localhost:8080'),
+        ('https://example.com:80/', 'example.com:80'),
+        ('https://example.com:8443/', 'example.com:8443'),
+        # No explicit port -> no port in Host.
+        ('https://example.com/', 'example.com'),
+        # IPv6 hosts keep their brackets.
+        ('http://[::1]:80/', '[::1]'),
+        ('http://[::1]:8080/', '[::1]:8080'),
+    ],
+)
+def test_Host_header_default_port_stripped(url, expected_host):
+    """
+    https://github.com/httpie/cli/issues/1034
+    """
+    r = http('--offline', '--print=H', url)
+    host_lines = [
+        line for line in r.splitlines()
+        if line.lower().startswith('host:')
+    ]
+    assert len(host_lines) == 1, r
+    assert host_lines[0] == f'Host: {expected_host}', r
+
+
 @pytest.mark.skipif(is_windows, reason='Unix-only')
 def test_output_devnull(httpbin):
     """
