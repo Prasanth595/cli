@@ -31,7 +31,7 @@ You are already up-to-date.
 def _read_data_error_free(file: Path) -> Any:
     # If the file is broken / non-existent, ignore it.
     try:
-        with open(file) as stream:
+        with open(file, encoding="utf-8") as stream:
             return json.load(stream)
     except (ValueError, OSError):
         return {}
