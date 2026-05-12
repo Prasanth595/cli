@@ -334,6 +334,15 @@ class TestPrettyOptions:
         assert r.strip().count('\n') == 2
         assert COLOR not in r
 
+    def test_verbose_json_request_body_preserves_unicode_escapes(self):
+        r = http(
+            '--verbose', '--offline', '--pretty=format',
+            'example.org',
+            f'a:={json.dumps(chr(0x3042))}',
+        )
+        assert '{"a": "\\u3042"}' in r
+        assert chr(0x3042) not in r
+
 
 class TestLineEndings:
     """

@@ -5,7 +5,7 @@ from typing import Callable, Iterable, Optional, Union
 from .processing import Conversion, Formatting
 from ..context import Environment
 from ..encoding import smart_decode, smart_encode, UTF8
-from ..models import HTTPMessage, OutputOptions
+from ..models import HTTPMessage, HTTPRequest, OutputOptions
 from ..utils import parse_content_type_header
 
 
@@ -217,6 +217,10 @@ class PrettyStream(EncodedStream):
             first_chunk = False
 
     def process_body(self, chunk: Union[str, bytes]) -> bytes:
+        if isinstance(self.msg, HTTPRequest) and self.mime == 'application/json':
+            if isinstance(chunk, (bytes, bytearray)):
+                return bytes(chunk)
+            return smart_encode(chunk, self.output_encoding)
         if not isinstance(chunk, str):
             # Text when a converter has been used,
             # otherwise it will always be bytes.
