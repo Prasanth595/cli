@@ -28,13 +28,23 @@ def http_status_to_exit_status(http_status: int, follow=False) -> ExitStatus:
 
     """
     if 300 <= http_status <= 399 and not follow:
-        # Redirect
+        # Redirect without follow
         return ExitStatus.ERROR_HTTP_3XX
+    elif 300 <= http_status <= 399 and follow:
+        # Redirect with follow - treat as success
+        return ExitStatus.SUCCESS
     elif 400 <= http_status <= 499:
         # Client Error
         return ExitStatus.ERROR_HTTP_4XX
     elif 500 <= http_status <= 599:
         # Server Error
         return ExitStatus.ERROR_HTTP_5XX
-    else:
+    elif 200 <= http_status <= 299:
+        # Success
         return ExitStatus.SUCCESS
+    elif 100 <= http_status <= 199:
+        # Informational - treat as success
+        return ExitStatus.SUCCESS
+    else:
+        # Invalid or unknown status codes (< 100, >= 600)
+        return ExitStatus.ERROR
