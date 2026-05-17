@@ -1,3 +1,4 @@
+import os
 import secrets
 import site
 import sys
@@ -217,8 +218,14 @@ def httpie_plugins(interface):
         # Prevent installed plugins from showing up.
         original_plugins = plugin_manager.copy()
         clean_sys_path = set(sys.path).difference(site.getsitepackages())
+        # These dummy plugins do not need isolated build dependencies, and the
+        # suite's pytest-httpbin CA bundle is only for test servers. If pip
+        # inherits it, plugin installs cannot verify PyPI's certificate.
         with patch('sys.path', list(clean_sys_path)):
-            response = httpie(*args, env=interface.environment)
+            with patch.dict(os.environ, {'PIP_NO_BUILD_ISOLATION': '1'}, clear=False):
+                os.environ.pop('REQUESTS_CA_BUNDLE', None)
+                os.environ.pop('CURL_CA_BUNDLE', None)
+                response = httpie(*args, env=interface.environment)
         plugin_manager.clear()
         plugin_manager.extend(original_plugins)
         return response
@@ -229,7 +236,7 @@ def httpie_plugins(interface):
 @pytest.fixture
 def httpie_plugins_success(httpie_plugins):
     def runner(*args, cli_mode: bool = True):
-        response = httpie_plugins(*args, cli_mode=True)
-        assert response.exit_status == ExitStatus.SUCCESS
+        response = httpie_plugins(*args, cli_mode=cli_mode)
+        assert response.exit_status == ExitStatus.SUCCESS, response.stderr
         return response.splitlines()
     return runner
