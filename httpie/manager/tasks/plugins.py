@@ -88,7 +88,7 @@ class PluginInstaller:
                 if self.debug:
                     self.env.stderr.write('Command failed: ')
                     self.env.stderr.write('pip ' + ' '.join(pip_args) + '\n')
-                    self.env.stderr.write(textwrap.indent('  ', stderr))
+                    self.env.stderr.write(textwrap.indent(stderr, '  '))
 
                 last_line = stderr.strip().splitlines()[-1]
                 severity, _, message = last_line.partition(': ')
