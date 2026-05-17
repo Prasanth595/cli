@@ -156,10 +156,21 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
     ) -> argparse.Namespace:
         self.env = env
         self.env.args = namespace = namespace or argparse.Namespace()
-        self.args, no_options = super().parse_known_intermixed_args(
-            args,
-            namespace,
-        )
+        self.args, no_options = super().parse_known_args(args, namespace)
+        if self.args.url:
+            request_items = [
+                option for option in no_options if not option.startswith('-')
+            ]
+            if request_items:
+                request_item_type = KeyValueArgType(*SEPARATOR_GROUP_ALL_ITEMS)
+                self.args.request_items = [
+                    *(self.args.request_items or []),
+                    *(request_item_type(item) for item in request_items),
+                ]
+                no_options = [
+                    option for option in no_options
+                    if option.startswith('-')
+                ]
         if self.args.debug:
             self.args.traceback = True
         self.has_stdin_data = (
