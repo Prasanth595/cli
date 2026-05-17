@@ -55,6 +55,16 @@ def test_credentials_in_url(httpbin_both):
     assert r.json == {'authenticated': True, 'user': 'user'}
 
 
+def test_credentials_in_url_are_percent_decoded():
+    args = httpie.cli.definition.parser.parse_args(
+        args=['https://u%40d:1%3D2%3F@example.org'],
+        env=MockEnvironment(),
+    )
+
+    assert args.auth.username == 'u@d'
+    assert args.auth.password == '1=2?'
+
+
 def test_credentials_in_url_auth_flag_has_priority(httpbin_both):
     """When credentials are passed in URL and via -a at the same time,
      then the ones from -a are used."""
