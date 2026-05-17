@@ -149,6 +149,23 @@ class TestItemParsing:
         ]
 
 
+class TestIntermixedOptions:
+    def test_output_option_after_url_keeps_request_items(self):
+        r = http(
+            '--offline',
+            '--ignore-stdin',
+            'post',
+            'pie.dev/post',
+            '-v',
+            'header1:xyz',
+            'x=1',
+        )
+
+        assert r.exit_status == ExitStatus.SUCCESS
+        assert 'header1: xyz' in r
+        assert '"x": "1"' in r
+
+
 class TestQuerystring:
     def test_query_string_params_in_url(self, httpbin):
         r = http('--print=Hhb', 'GET', httpbin + '/get?a=1&b=2')
