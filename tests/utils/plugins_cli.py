@@ -218,13 +218,11 @@ def httpie_plugins(interface):
         # Prevent installed plugins from showing up.
         original_plugins = plugin_manager.copy()
         clean_sys_path = set(sys.path).difference(site.getsitepackages())
-        with (
-            patch('sys.path', list(clean_sys_path)),
-            patch.dict(os.environ, {}, clear=False),
-        ):
-            os.environ.pop('REQUESTS_CA_BUNDLE', None)
-            os.environ.pop('CURL_CA_BUNDLE', None)
-            response = httpie(*args, env=interface.environment)
+        with patch('sys.path', list(clean_sys_path)):
+            with patch.dict(os.environ, {}, clear=False):
+                os.environ.pop('REQUESTS_CA_BUNDLE', None)
+                os.environ.pop('CURL_CA_BUNDLE', None)
+                response = httpie(*args, env=interface.environment)
         plugin_manager.clear()
         plugin_manager.extend(original_plugins)
         return response
