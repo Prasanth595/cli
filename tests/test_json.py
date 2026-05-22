@@ -539,6 +539,18 @@ def test_nested_json_syntax(input_json, expected_json, httpbin):
             'HTTPie Value Error: Negative indexes are not supported.\nfoo[-10]\n    ^^^',
         ),
         (
+            ['foo[99999999999999999999999]:=1'],
+            'HTTPie Value Error: The index is too large.'
+            '\nfoo[99999999999999999999999]'
+            '\n    ^^^^^^^^^^^^^^^^^^^^^^^',
+        ),
+        (
+            ['foo[1000000000000000000]:=1'],
+            'HTTPie Value Error: The index is too large.'
+            '\nfoo[1000000000000000000]'
+            '\n    ^^^^^^^^^^^^^^^^^^^',
+        ),
+        (
             ['foo[0]:=1', 'foo[]:=2', 'foo[\\2]:=3'],
             "HTTPie Type Error: Cannot perform 'key' based access on 'foo' which has a type of 'array' but this operation requires a type of 'object'.\nfoo[\\2]\n   ^^^^",
         ),

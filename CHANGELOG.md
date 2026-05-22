@@ -3,6 +3,10 @@
 This document records all notable changes to [HTTPie](https://httpie.io).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [unreleased](https://github.com/httpie/cli/compare/3.2.4...master)
+
+- Fixed an unhandled `OverflowError`/`MemoryError` crash when an out-of-range array index was used in the nested JSON syntax (e.g. `item[99999999999999999999999]:=1`); a clear error is now reported instead.
+
 ## [3.2.4](https://github.com/httpie/cli/compare/3.2.3...3.2.4) (2024-11-01)
 
 - Fix default certs loading and unpin `requests`. ([#1596](https://github.com/httpie/cli/issues/1596))
