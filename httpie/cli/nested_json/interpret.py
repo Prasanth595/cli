@@ -84,7 +84,15 @@ def interpret(context: Any, key: str, value: Any) -> Any:
                     message='Negative indexes are not supported.',
                     message_kind='Value',
                 )
-            cursor.extend([None] * (path.accessor - len(cursor) + 1))
+            try:
+                cursor.extend([None] * (path.accessor - len(cursor) + 1))
+            except (OverflowError, MemoryError):
+                raise NestedJSONSyntaxError(
+                    source=key,
+                    token=path.tokens[1],
+                    message='The index is too large.',
+                    message_kind='Value',
+                ) from None
             if next_path.kind is PathAction.SET:
                 cursor[path.accessor] = next_path.accessor
                 break
