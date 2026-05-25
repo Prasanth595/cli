@@ -238,24 +238,31 @@ def apply_missing_repeated_headers(
     ones. This allows the requests to be prepared as usual, and then later
     merged with headers that are specified multiple times."""
 
-    new_headers = HTTPHeadersDict(prepared_request.headers)
-    for prepared_name, prepared_value in prepared_request.headers.items():
+    # Materialize items to lists to avoid CIMultiDict/CaseInsensitiveDict
+    # interaction issues that can silently drop headers (e.g. Content-Type).
+    prepared_items = list(prepared_request.headers.items())
+    original_items = list(original_headers.items())
+    new_headers = HTTPHeadersDict()
+    for prepared_name, prepared_value in prepared_items:
         if prepared_name not in original_headers:
+            new_headers.add(prepared_name, prepared_value)
             continue
 
-        original_keys, original_values = zip(*filter(
-            lambda item: item[0].casefold() == prepared_name.casefold(),
-            original_headers.items()
-        ))
+        matched = [
+            (k, v) for k, v in original_items
+            if k.casefold() == prepared_name.casefold()
+        ]
+        original_keys, original_values = zip(*matched)
 
         if prepared_value not in original_values:
             # If the current value is not among the initial values
             # set for this field, then it means that this field got
             # overridden on the way, and we should preserve it.
+            new_headers.add(prepared_name, prepared_value)
             continue
 
-        new_headers.popone(prepared_name)
-        new_headers.update(zip(original_keys, original_values))
+        for key, value in zip(original_keys, original_values):
+            new_headers.add(key, value)
 
     prepared_request.headers = new_headers
 
