@@ -247,6 +247,76 @@ class TestDownloads:
                 downloader.chunk_downloaded(b'45')
                 downloader.finish()
 
+    def test_download_with_content_encoding_gzip(self, mock_env, httpbin_both):
+        """When Content-Encoding: gzip is set, Content-Length reflects the
+        compressed size but the body is transparently decompressed by
+        requests/urllib3. The download should not be flagged as incomplete.
+
+        <https://github.com/httpie/cli/issues/1642>
+        """
+        with open(os.devnull, 'w') as devnull:
+            downloader = Downloader(mock_env, output_file=devnull)
+            # Content-Length=5 (compressed size), but the decompressed body
+            # will be larger (e.g. 100 bytes).
+            downloader.start(
+                initial_url='/',
+                final_response=Response(
+                    url=httpbin_both.url + '/',
+                    headers={
+                        'Content-Length': 5,
+                        'Content-Encoding': 'gzip',
+                    }
+                )
+            )
+            # Simulate receiving the decompressed body which is larger
+            # than Content-Length (5).
+            downloader.chunk_downloaded(b'x' * 100)
+            downloader.finish()
+            assert not downloader.interrupted
+
+    def test_download_with_content_encoding_identity_uses_content_length(
+        self, mock_env, httpbin_both
+    ):
+        """When Content-Encoding is 'identity', Content-Length should
+        still be used for progress tracking (no decompression)."""
+        with open(os.devnull, 'w') as devnull:
+            downloader = Downloader(mock_env, output_file=devnull)
+            downloader.start(
+                initial_url='/',
+                final_response=Response(
+                    url=httpbin_both.url + '/',
+                    headers={
+                        'Content-Length': 10,
+                        'Content-Encoding': 'identity',
+                    }
+                )
+            )
+            downloader.chunk_downloaded(b'12345')
+            downloader.chunk_downloaded(b'12345')
+            downloader.finish()
+            assert not downloader.interrupted
+
+    def test_download_with_content_encoding_gzip_interrupted(self, mock_env, httpbin_both):
+        """Even with Content-Encoding, an actually interrupted download
+        (no chunks received) should still be flagged."""
+        with open(os.devnull, 'w') as devnull:
+            downloader = Downloader(mock_env, output_file=devnull)
+            downloader.start(
+                initial_url='/',
+                final_response=Response(
+                    url=httpbin_both.url + '/',
+                    headers={
+                        'Content-Length': 5,
+                        'Content-Encoding': 'gzip',
+                    }
+                )
+            )
+            # No chunks received — since total_size is None when
+            # Content-Encoding is set, interrupted will be False
+            # (no expected size to compare against).
+            downloader.finish()
+            assert not downloader.interrupted
+
     def test_download_with_redirect_original_url_used_for_filename(self, httpbin):
         # Redirect from `/redirect/1` to `/get`.
         expected_filename = '1.json'
