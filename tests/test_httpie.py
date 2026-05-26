@@ -7,6 +7,7 @@ import pytest
 import httpie
 import httpie.__main__
 from .fixtures import FILE_CONTENT, FILE_PATH
+from httpie.cli.argparser import BaseHTTPieArgumentParser
 from httpie.cli.exceptions import ParseError
 from httpie.context import Environment
 from httpie.encoding import UTF8
@@ -37,6 +38,47 @@ def test_help():
     r = http('--help', tolerate_error_exit_status=True)
     assert r.exit_status == ExitStatus.SUCCESS
     assert 'https://github.com/httpie/cli/issues' in r
+
+
+def test_help_with_ascii_stdout():
+    stdout = io.TextIOWrapper(io.BytesIO(), encoding='ascii')
+    env = MockEnvironment(stdout=stdout, stdout_isatty=True)
+
+    r = http('--help', env=env, tolerate_error_exit_status=True)
+
+    assert r.exit_status == ExitStatus.SUCCESS
+    r.encode('ascii')
+    assert 'https://github.com/httpie/cli/issues' in r
+
+
+def test_help_message_encodes_binary_stream_without_buffer():
+    output = io.BytesIO()
+    parser = BaseHTTPieArgumentParser()
+    parser.env = MockEnvironment(stdout_encoding='ascii')
+
+    parser._print_message('\u00e9', output)
+
+    assert output.getvalue() == b'\\xe9'
+
+
+def test_help_message_reraises_non_text_unicode_errors():
+    class UnicodeErrorStream:
+        encoding = 'ascii'
+
+        def write(self, message):
+            raise UnicodeEncodeError(
+                'ascii',
+                '\u00e9',
+                0,
+                1,
+                'ordinal not in range',
+            )
+
+    parser = BaseHTTPieArgumentParser()
+    parser.env = MockEnvironment()
+
+    with pytest.raises(UnicodeEncodeError):
+        parser._print_message(b'help', UnicodeErrorStream())
 
 
 def test_version():

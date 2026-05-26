@@ -121,8 +121,22 @@ class BaseHTTPieArgumentParser(argparse.ArgumentParser):
             }.get(file, file)
 
         if not hasattr(file, 'buffer') and isinstance(message, str):
-            message = message.encode(env.stdout_encoding)
-        super()._print_message(message, file)
+            encoding = getattr(env, 'stdout_encoding', None) or sys.getdefaultencoding()
+            message = message.encode(encoding, errors='backslashreplace')
+        try:
+            super()._print_message(message, file)
+        except UnicodeEncodeError:
+            if not isinstance(message, str):
+                raise
+            encoding = (
+                getattr(file, 'encoding', None)
+                or getattr(env, 'stdout_encoding', None)
+                or sys.getdefaultencoding()
+            )
+            message = message.encode(
+                encoding, errors='backslashreplace'
+            ).decode(encoding)
+            super()._print_message(message, file)
 
 
 class HTTPieManagerArgumentParser(BaseHTTPieArgumentParser):

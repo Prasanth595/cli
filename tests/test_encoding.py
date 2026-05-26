@@ -14,7 +14,7 @@ from .fixtures import UNICODE
 
 
 CHARSET_TEXT_PAIRS = [
-    ('big5', '卷首卷首卷首卷首卷卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首卷首'),
+    ('big5', '中文測試內容，這是一段使用繁體中文撰寫的文字，用來確認 Big5 編碼可以被正確偵測。'),
     ('windows-1250', 'Všichni lidé jsou si rovni. Všichni lidé jsou si rovni.'),
     (UTF8, 'Všichni lidé jsou si rovni. Všichni lidé jsou si rovni.'),
 ]

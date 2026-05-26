@@ -30,6 +30,11 @@ NAKED_HELP_MESSAGE_PRETTY_WITH_INVALID_ARG = NAKED_BASE_TEMPLATE.format(
     error_msg="argument --pretty: invalid choice: '$invalid' (choose from 'all', 'colors', 'format', 'none')"
 )
 
+NAKED_HELP_MESSAGE_PRETTY_WITH_INVALID_ARG_UNQUOTED = NAKED_BASE_TEMPLATE.format(
+    extra_args="--pretty {all, colors, format, none} ",
+    error_msg="argument --pretty: invalid choice: '$invalid' (choose from all, colors, format, none)"
+)
+
 
 PREDEFINED_TERMINAL_SIZE = (200, 100)
 
@@ -57,9 +62,18 @@ def ignore_terminal_size(monkeypatch):
         ([], NAKED_HELP_MESSAGE),
         (['--pretty'], NAKED_HELP_MESSAGE_PRETTY_WITH_NO_ARG),
         (['pie.dev', '--pretty'], NAKED_HELP_MESSAGE_PRETTY_WITH_NO_ARG),
-        (['--pretty', '$invalid'], NAKED_HELP_MESSAGE_PRETTY_WITH_INVALID_ARG),
+        (
+            ['--pretty', '$invalid'],
+            (
+                NAKED_HELP_MESSAGE_PRETTY_WITH_INVALID_ARG,
+                NAKED_HELP_MESSAGE_PRETTY_WITH_INVALID_ARG_UNQUOTED,
+            )
+        ),
     ]
 )
 def test_naked_invocation(ignore_terminal_size, args, expected_msg):
     result = http(*args, tolerate_error_exit_status=True)
-    assert result.stderr == expected_msg
+    if isinstance(expected_msg, tuple):
+        assert result.stderr in expected_msg
+    else:
+        assert result.stderr == expected_msg

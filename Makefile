@@ -50,10 +50,10 @@ install: venv install-reqs
 
 install-reqs:
 	@echo $(H1)Updating package tools$(H1END)
-	$(VENV_PIP) install --upgrade pip wheel build
+	$(VENV_PIP) install --upgrade "pip<25.3; python_version<'3.10'" "pip; python_version>='3.10'" setuptools wheel build
 
 	@echo $(H1)Installing dev requirements$(H1END)
-	$(VENV_PIP) install --upgrade '.[dev]' '.[test]'
+	$(VENV_PIP) install --upgrade --use-pep517 '.[dev]' '.[test]'
 
 	@echo $(H1)Installing HTTPie$(H1END)
 	$(VENV_PIP) install --upgrade --editable .
