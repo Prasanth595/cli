@@ -177,7 +177,7 @@ Get the standalone HTTPie Linux executables when you don't want to go through th
 ```bash
 # Install httpie
 $ https --download packages.httpie.io/binaries/linux/http-latest -o http
-$ ln -ls ./http ./https
+$ ln -s ./http ./https
 $ chmod +x ./http ./https
 ```
 
@@ -2051,7 +2051,7 @@ $ http -dco file.zip example.org/file
 - The `--download` option only changes how the response body is treated.
 - You can still set custom headers, use sessions, `--verbose, -v`, etc.
 - `--download` always implies `--follow` (redirects are followed).
-- `--download` also implies `--check-status` (error HTTP status will result in a non-zero exist static code).
+- `--download` also implies `--check-status` (error HTTP status will result in a non-zero exit status code).
 - HTTPie exits with status code `1` (error) if the body hasn’t been fully downloaded.
 - `Accept-Encoding` can’t be set with `--download`.
 
