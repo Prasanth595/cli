@@ -296,9 +296,10 @@ class TestDownloads:
             downloader.finish()
             assert not downloader.interrupted
 
-    def test_download_with_content_encoding_gzip_interrupted(self, mock_env, httpbin_both):
-        """Even with Content-Encoding, an actually interrupted download
-        (no chunks received) should still be flagged."""
+    def test_download_with_content_encoding_gzip_not_flagged_interrupted(self, mock_env, httpbin_both):
+        """When Content-Encoding is set, Content-Length is ignored so
+        total_size is None. Without an expected size, a download with
+        no chunks received is NOT flagged as interrupted."""
         with open(os.devnull, 'w') as devnull:
             downloader = Downloader(mock_env, output_file=devnull)
             downloader.start(
