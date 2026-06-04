@@ -343,7 +343,11 @@ def make_request_kwargs(
     headers = make_default_headers(args)
     if base_headers:
         headers.update(base_headers)
+    # Preserve existing Content-Type when merging user-supplied headers
+    user_content_type = headers.get('Content-Type')
     headers.update(args.headers)
+    if user_content_type and 'Content-Type' not in args.headers:
+        headers['Content-Type'] = user_content_type
     if args.offline and args.chunked and 'Transfer-Encoding' not in headers:
         # When online, we let requests set the header instead to be able more
         # easily verify chunking is taking place.
