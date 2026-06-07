@@ -343,6 +343,9 @@ def make_request_kwargs(
     headers = make_default_headers(args)
     if base_headers:
         headers.update(base_headers)
+    # Apply default headers from config (can be overridden by user)
+    if env.config.default_headers:
+        headers.update(env.config.default_headers)
     headers.update(args.headers)
     if args.offline and args.chunked and 'Transfer-Encoding' not in headers:
         # When online, we let requests set the header instead to be able more

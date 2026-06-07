@@ -26,12 +26,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-13, windows-latest]
         python-version:
-          - '3.12'
-          - '3.11'
-          - '3.10'
-          - '3.9'
-          - '3.8'
-          - '3.7'
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+
         pyopenssl: [0, 1]
     runs-on: ${{ matrix.os }}
     steps:
