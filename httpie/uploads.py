@@ -87,7 +87,16 @@ def _wrap_function_with_callback(
 def is_stdin(file: IO) -> bool:
     try:
         file_no = file.fileno()
-    except Exception:
+    except (OSError, ValueError, AttributeError):
+        # fileno() can fail in a few documented ways:
+        # - AttributeError: object has no fileno attribute (e.g. BytesIO,
+        #   custom streams, anything that doesn't expose a real fd);
+        # - io.UnsupportedOperation: stream types like StringIO that
+        #   explicitly disallow fileno() (subclass of OSError);
+        # - ValueError: "I/O operation on closed file" for closed
+        #   file objects;
+        # - OSError: low-level errors on a corrupted/closed fd.
+        # In all of these cases the object is not stdin, so return False.
         return False
     else:
         return file_no == sys.stdin.fileno()

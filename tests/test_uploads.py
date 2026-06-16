@@ -401,3 +401,55 @@ class TestRequestBodyFromFilePath:
         )
         assert r.exit_status == ExitStatus.ERROR
         assert 'from multiple files' in r.stderr
+
+
+class TestIsStdin:
+    """`is_stdin` should return False (and not raise) for any object whose
+    `fileno()` call fails for a documented reason (no attribute, closed file,
+    or non-fd stream like StringIO)."""
+    def test_is_stdin_returns_false_for_plain_object_without_fileno(self):
+        from httpie.uploads import is_stdin
+
+        class NoFileno:
+            def read(self, *_args, **_kwargs):
+                return b''
+
+        assert is_stdin(NoFileno()) is False
+
+    def test_is_stdin_returns_false_for_closed_file(self):
+        from httpie.uploads import is_stdin
+        import tempfile
+        f = tempfile.TemporaryFile()
+        f.close()
+        assert is_stdin(f) is False
+
+    def test_is_stdin_returns_false_for_stringio(self):
+        from httpie.uploads import is_stdin
+        import io
+        assert is_stdin(io.StringIO('hello')) is False
+
+    def test_is_stdin_returns_false_for_bytesio(self):
+        from httpie.uploads import is_stdin
+        import io
+        assert is_stdin(io.BytesIO(b'hello')) is False
+
+    def test_is_stdin_returns_false_for_other_real_file(self, monkeypatch):
+        from httpie.uploads import is_stdin
+        import io
+        import os
+        import tempfile
+        # Patch sys.stdin with a known surrogate so we control both sides
+        # of the comparison; pytest's own capture machinery replaces sys.stdin
+        # with a DontReadFromInput whose fileno() raises io.UnsupportedOperation,
+        # which is fragile to depend on in a unit test.
+        stdin_surrogate = io.BytesIO()
+        stdin_surrogate.fileno = lambda: 4242  # any value that won't collide
+        monkeypatch.setattr('httpie.uploads.sys.stdin', stdin_surrogate)
+        # is_stdin(our surrogate) should be True
+        assert is_stdin(stdin_surrogate) is True
+        # is_stdin(any other real fd) should be False
+        r, w = os.pipe()
+        try:
+            assert is_stdin(os.fdopen(r, 'r')) is False
+        finally:
+            os.close(w)
