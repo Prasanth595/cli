@@ -442,6 +442,54 @@ class TestExpiredCookies(CookieTestBase):
     def test_get_expired_cookies_manages_multiple_cookie_headers(self, cookies, now, expected_expired):
         assert get_expired_cookies(cookies, now=now) == expected_expired
 
+    @pytest.mark.parametrize(
+        'cookies, now, expected_expired',
+        [
+            # Negative max-age means the cookie expired N seconds ago
+            # (RFC 6265 § 5.2.2), so it must be treated as expired now.
+            (
+                'session=abc; Max-Age=-300; path=/; domain=.example.com; HttpOnly',
+                None,
+                [{'name': 'session', 'path': '/'}],
+            ),
+            # An explicitly positive max-age in the future is NOT expired.
+            (
+                'session=abc; Max-Age=300; path=/; domain=.example.com; HttpOnly',
+                None,
+                [],
+            ),
+            # An explicitly positive max-age in the past (more than N seconds
+            # ago) IS expired.
+            (
+                # Clock is in 1970 (well before the max-age is reached), so a
+                # 10-second max-age is in the future and the cookie is not yet
+                # expired.
+                'session=abc; Max-Age=10; path=/; domain=.example.com; HttpOnly',
+                100.0,
+                [],
+            ),
+            (
+                # max-age=0 with a non-zero clock: cookie expired exactly at
+                # `now`, so the expiry is <= now and it is treated as
+                # expired.
+                'session=abc; Max-Age=0; path=/; domain=.example.com; HttpOnly',
+                100.0,
+                [{'name': 'session', 'path': '/'}],
+            ),
+            # A bare '-' with no digits is not a number and must be ignored
+            # rather than raising.
+            (
+                'session=abc; Max-Age=-; path=/; domain=.example.com; HttpOnly',
+                None,
+                [],
+            ),
+        ],
+    )
+    def test_get_expired_cookies_handles_signed_max_age(
+        self, cookies, now, expected_expired,
+    ):
+        assert get_expired_cookies(cookies, now=now) == expected_expired
+
 
 class TestCookieStorage(CookieTestBase):
 

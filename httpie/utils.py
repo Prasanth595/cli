@@ -190,14 +190,17 @@ def _max_age_to_expires(cookies, now):
     Translate `max-age` into `expires` for Requests to take it into account.
 
     HACK/FIXME: <https://github.com/psf/requests/issues/5743>
-
     """
     for cookie in cookies:
         if 'expires' in cookie:
             continue
         max_age = cookie.get('max-age')
-        if max_age and max_age.isdigit():
-            cookie['expires'] = now + float(max_age)
+        if max_age:
+            match = re.match(r'^([-+]?)(\d+)$', max_age)
+            if match:
+                sign, digits = match.groups()
+                sign_value = -1 if sign == '-' else 1
+                cookie['expires'] = now + sign_value * int(digits)
 
 
 def parse_content_type_header(header):
