@@ -164,7 +164,7 @@ def tokenize(source: str) -> Iterator[Token]:
         if index in OPERATORS:
             yield from send_buffer()
             yield Token(OPERATORS[index], index, cursor, cursor + 1)
-        elif index == BACKSLASH and can_advance():
+        elif index == BACKSLASH and cursor + 1 < len(source):
             if source[cursor + 1] in SPECIAL_CHARS:
                 backslashes += 1
             else:
