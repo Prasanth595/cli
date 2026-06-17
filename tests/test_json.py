@@ -582,6 +582,7 @@ def test_nested_json_sparse_array(httpbin_both):
     r = http(httpbin_both + '/post', 'test[0]:=1', 'test[100]:=1')
     assert len(r.json['json']['test']) == 101
 
+
 def test_nested_json_trailing_backslash_no_crash():
     """A backslash at the very end of a key must not crash with IndexError.
 
