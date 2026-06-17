@@ -581,3 +581,22 @@ def test_nested_json_errors(input_json, expected_error, httpbin):
 def test_nested_json_sparse_array(httpbin_both):
     r = http(httpbin_both + '/post', 'test[0]:=1', 'test[100]:=1')
     assert len(r.json['json']['test']) == 101
+
+
+def test_nested_json_trailing_backslash_no_crash():
+    """A backslash at the very end of a key must not crash with IndexError.
+
+    Regression test for: tokenize() accessed source[cursor + 1] without
+    first verifying cursor + 1 < len(source).
+    """
+    from httpie.cli.nested_json.parse import tokenize, parse
+
+    trailing_bs = 'key' + chr(92)  # 'key\'
+
+    # tokenize must not raise IndexError
+    tokens = list(tokenize(trailing_bs))
+    assert tokens  # produced at least one token
+
+    # parse must also be safe
+    paths = list(parse(trailing_bs))
+    assert paths
