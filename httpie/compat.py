@@ -43,7 +43,7 @@ except ImportError:
 
         def __init__(self, func, name=None):
             self.real_func = func
-            self.__doc__ = getattr(func, '__doc__')
+            self.__doc__ = func.__doc__
 
         def __set_name__(self, owner, name):
             if self.name is None:

@@ -204,8 +204,8 @@ class PrettyStream(EncodedStream):
                     converter = self.conversion.get_converter(self.mime)
                     if converter:
                         body = bytearray()
-                        # noinspection PyAssignmentToLoopOrWithParameter
-                        for line, lf in chain([(line, lf)], iter_lines):
+                        for _line, _lf in chain([(line, lf)], iter_lines):
+                            line, lf = _line, _lf
                             body.extend(line)
                             body.extend(lf)
                         self.mime, body = converter.convert(body)

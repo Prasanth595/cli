@@ -94,7 +94,7 @@ def _is_key_file_encrypted(key_file):
 
     Copy of the internal urllib function (urllib3.util.ssl_)"""
 
-    with open(key_file, "r") as f:
+    with open(key_file) as f:
         for line in f:
             # Look for Proc-Type: 4,ENCRYPTED
             if "ENCRYPTED" in line:

@@ -50,9 +50,16 @@ def test_lazy_choices():
 
 
 def test_lazy_choices_help():
+    import sys
     mock = Mock()
     getter = mock.getter
     getter.return_value = ['a', 'b', 'c']
+
+    # Python 3.14+ calls getter during argparse initialisation
+    if sys.version_info >= (3, 14):
+        from unittest.mock import ANY
+        getter.assert_called()
+        getter.reset_mock()
 
     help_formatter = mock.help_formatter
     help_formatter.return_value = '<my help>'

@@ -131,7 +131,7 @@ class HTTPieManagerArgumentParser(BaseHTTPieArgumentParser):
             return super().parse_known_args(args, namespace)
         except SystemExit as exc:
             if not hasattr(self, 'root') and exc.code == 2:  # Argument Parser Error
-                raise argparse.ArgumentError(None, None)
+                raise argparse.ArgumentError(None, None) from exc
             raise
 
 
