@@ -54,6 +54,8 @@ def test_lazy_choices_help():
     getter = mock.getter
     getter.return_value = ['a', 'b', 'c']
 
+    # Help formatter is only called when --help is used (lazy)
+
     help_formatter = mock.help_formatter
     help_formatter.return_value = '<my help>'
 

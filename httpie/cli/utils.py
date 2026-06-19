@@ -54,12 +54,7 @@ class LazyChoices(argparse.Action, Generic[T]):
         return self._obj
 
     @property
-    def help(self) -> str:
-        if self._help is None and self.help_formatter is not None:
-            self._help = self.help_formatter(
-                self.load(),
-                isolation_mode=self.isolation_mode
-            )
+    def help(self) -> str | None:
         return self._help
 
     @help.setter
