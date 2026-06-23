@@ -5,7 +5,7 @@ import re
 import sys
 from argparse import RawDescriptionHelpFormatter
 from textwrap import dedent
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from requests.utils import get_netrc_auth
 
@@ -288,9 +288,9 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
 
         if self.args.auth is None and not auth_type_set:
             if url.username is not None:
-                # Handle http://username:password@hostname/
-                username = url.username
-                password = url.password or ''
+                # Handle http://username:***@hostname/
+                username = unquote(url.username)
+                password = unquote(url.password) if url.password else ''
                 self.args.auth = AuthCredentials(
                     key=username,
                     value=password,
