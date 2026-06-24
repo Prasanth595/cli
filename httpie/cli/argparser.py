@@ -412,15 +412,19 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
 
         """
         if self.args.method is None:
-            # Invoked as `http URL'.
-            assert not self.args.request_items
-            if self.has_input_data:
+            if self.args.request_items:
+                # Invoked as `http [opts] URL item+'. The URL is now in
+                # `args.method` and the first ITEM is now incorrectly in
+                # `args.url` (argparse confusion with optional arguments
+                # between method and URL). Handle like the elif branch.
+                pass
+            elif self.has_input_data:
                 self.args.method = HTTP_POST
             else:
                 self.args.method = HTTP_GET
 
         # FIXME: False positive, e.g., "localhost" matches but is a valid URL.
-        elif not re.match('^[a-zA-Z]+$', self.args.method):
+        if self.args.method is None or not re.match('^[a-zA-Z]+$', self.args.method):
             # Invoked as `http URL item+'. The URL is now in `args.method`
             # and the first ITEM is now incorrectly in `args.url`.
             try:
@@ -431,7 +435,19 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
             except argparse.ArgumentTypeError as e:
                 if self.args.traceback:
                     raise
-                self.error(e.args[0])
+                # If the URL can't be parsed as a request item, it might be
+                # a method that was parsed as URL due to argparse confusion
+                # with optional arguments. Swap method and URL, and restore
+                # the actual URL from the first request item if it looks like one.
+                self.args.url, self.args.method = self.args.method, self.args.url
+                # If the first request item looks like a URL (has '://' or is
+                # a hostname), restore it as the URL and remove from items.
+                if self.args.request_items:
+                    first = self.args.request_items[0]
+                    orig = getattr(first, 'orig', None) or (isinstance(first, dict) and first.get('orig', ''))
+                    if orig and '://' in orig:
+                        self.args.url = orig
+                        self.args.request_items.pop(0)
 
             else:
                 # Set the URL correctly
