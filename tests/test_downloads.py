@@ -147,6 +147,53 @@ class TestDownloads:
             downloader.finish()
             assert not downloader.interrupted
 
+    def test_download_with_Content_Encoding_skips_size_check(self, mock_env, httpbin_both):
+        # When the server applies a content coding, ``requests`` auto-decompresses
+        # the body but Content-Length still reflects the encoded size per
+        # RFC 9110 §8.6. The downloader must skip the size comparison in that
+        # case so a fully-received, encoded payload isn't reported as an
+        # "Incomplete download".
+        # <https://github.com/httpie/cli/issues/423>
+        with open(os.devnull, 'w') as devnull:
+            for content_encoding in ('gzip', 'br', 'deflate'):
+                downloader = Downloader(mock_env, output_file=devnull)
+                downloader.start(
+                    initial_url='/',
+                    final_response=Response(
+                        url=httpbin_both.url + '/',
+                        headers={
+                            'Content-Length': 10,
+                            'Content-Encoding': content_encoding,
+                        },
+                    ),
+                )
+                # Decompressed stream ends up much larger than the encoded size.
+                downloader.chunk_downloaded(b'1234567890' * 1000)
+                downloader.finish()
+                assert not downloader.interrupted, (
+                    f'Content-Encoding={content_encoding!r} should bypass '
+                    f'the size comparison; got interrupted=True.'
+                )
+
+    def test_download_with_Content_Encoding_uppercase_or_padded(self, mock_env, httpbin_both):
+        # Header values come back with arbitrary casing and surrounding whitespace;
+        # the downloader must recognise those as content codings too.
+        with open(os.devnull, 'w') as devnull:
+            downloader = Downloader(mock_env, output_file=devnull)
+            downloader.start(
+                initial_url='/',
+                final_response=Response(
+                    url=httpbin_both.url + '/',
+                    headers={
+                        'Content-Length': 10,
+                        'Content-Encoding': '  GZIP  ',
+                    },
+                ),
+            )
+            downloader.chunk_downloaded(b'1234567890' * 1000)
+            downloader.finish()
+            assert not downloader.interrupted
+
     def test_download_no_Content_Length(self, mock_env, httpbin_both):
         with open(os.devnull, 'w') as devnull:
             downloader = Downloader(mock_env, output_file=devnull)
