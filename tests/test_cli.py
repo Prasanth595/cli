@@ -235,6 +235,16 @@ class TestLocalhostShorthand:
         )
         assert args.url == 'http://0000:0000:0000:0000:0000:0000:0000:0001'
 
+    def test_localhost_with_request_items_does_not_parse_as_method(self):
+        args = parser.parse_args(
+            args=['localhost', 'foo=bar'],
+            env=MockEnvironment()
+        )
+        assert args.url == 'http://localhost'
+        assert args.method == 'POST'
+        assert args.request_items[0].key == 'foo'
+        assert args.request_items[0].value == 'bar'
+
 
 class TestArgumentParser:
 
