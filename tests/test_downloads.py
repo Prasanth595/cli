@@ -1,17 +1,20 @@
 import os
 import tempfile
 import time
-import requests
+from io import StringIO
 from unittest import mock
 from urllib.request import urlopen
 
 import pytest
+import requests
+from rich.console import Console
 from requests.structures import CaseInsensitiveDict
 
 from httpie.downloads import (
     parse_content_range, filename_from_content_disposition, filename_from_url,
     get_unique_filename, ContentRangeError, Downloader, PARTIAL_CONTENT
 )
+from httpie.output.ui.rich_progress import ProgressDisplay
 from .utils import http, MockEnvironment
 
 
@@ -246,6 +249,28 @@ class TestDownloads:
                 )
                 downloader.chunk_downloaded(b'45')
                 downloader.finish()
+
+    def test_resumed_download_summary_uses_current_transfer_for_speed(self):
+        stderr = StringIO()
+        env = MockEnvironment(
+            stderr=stderr,
+            stderr_isatty=False,
+            show_displays=True,
+        )
+        env.rich_error_console = Console(
+            file=stderr,
+            force_terminal=False,
+            no_color=True,
+            width=120,
+        )
+        display = ProgressDisplay(env)
+
+        display.start(total=5, at=3, description='Downloading to file.bin')
+        display.update(2)
+        display.stop(time_spent=2)
+
+        summary = stderr.getvalue()
+        assert 'Done. 5 bytes in 00:2.00000 (1 byte/s)' in summary
 
     def test_download_with_redirect_original_url_used_for_filename(self, httpbin):
         # Redirect from `/redirect/1` to `/get`.
