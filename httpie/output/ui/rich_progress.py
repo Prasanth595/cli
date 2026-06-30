@@ -28,7 +28,11 @@ class BaseDisplay:
         return self.env.rich_error_console
 
     def _print_summary(
-        self, is_finished: bool, observed_steps: int, time_spent: float
+        self,
+        is_finished: bool,
+        observed_steps: float,
+        time_spent: float,
+        total_steps: Optional[float] = None,
     ):
         from rich import filesize
 
@@ -37,7 +41,10 @@ class BaseDisplay:
         else:
             verb = 'Interrupted'
 
-        total_size = filesize.decimal(observed_steps)
+        if total_steps is None:
+            total_steps = observed_steps
+
+        total_size = filesize.decimal(total_steps)
         avg_speed = filesize.decimal(observed_steps / time_spent)
 
         minutes, seconds = divmod(time_spent, 60)
@@ -63,6 +70,7 @@ class StatusDisplay(BaseDisplay):
     def start(
         self, *, total: Optional[float], at: float, description: str
     ) -> None:
+        self.initial_observed = at
         self.observed = at
         self.description = (
             f'[progress.description]{description}[/progress.description]'
@@ -89,8 +97,9 @@ class StatusDisplay(BaseDisplay):
         if time_spent:
             self._print_summary(
                 is_finished=True,
-                observed_steps=self.observed,
+                observed_steps=self.observed - self.initial_observed,
                 time_spent=time_spent,
+                total_steps=self.observed,
             )
 
 
@@ -107,6 +116,7 @@ class ProgressDisplay(BaseDisplay):
         )
 
         assert total is not None
+        self.initial_completed = at
         self.console.print(f'[progress.description]{description}')
         self.progress_bar = Progress(
             '[',
@@ -136,6 +146,7 @@ class ProgressDisplay(BaseDisplay):
             [task] = self.progress_bar.tasks
             self._print_summary(
                 is_finished=task.finished,
-                observed_steps=task.completed,
+                observed_steps=task.completed - self.initial_completed,
                 time_spent=time_spent,
+                total_steps=task.completed,
             )
