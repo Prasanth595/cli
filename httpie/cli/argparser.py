@@ -420,7 +420,10 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
                 self.args.method = HTTP_GET
 
         # FIXME: False positive, e.g., "localhost" matches but is a valid URL.
-        elif not re.match('^[a-zA-Z]+$', self.args.method):
+        elif self.args.method.upper() not in {
+            'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD', 'CONNECT', 'TRACE',
+            'PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'PURGE'
+        } or not re.match('^[a-zA-Z]+$', self.args.method):
             # Invoked as `http URL item+'. The URL is now in `args.method`
             # and the first ITEM is now incorrectly in `args.url`.
             try:
