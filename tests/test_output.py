@@ -235,6 +235,10 @@ class TestColors:
             ('foo/json-foo', False, None, 'JSON'),
             ('foo/x-json', False, None, 'JSON'),
             ('application/vnd.comverge.grid+hal+json', False, None, 'JSON'),
+            # When both the subtype name and the `+`-suffix resolve to a lexer,
+            # the name must win (it is tried first). Previously the lexer-name
+            # loop had no break, so the last match -- the suffix -- won instead.
+            ('application/yaml+python', False, None, 'YAML'),
             ('text/plain', True, '{}', 'JSON'),
             ('text/plain', True, 'foo', 'Text only'),
         ]

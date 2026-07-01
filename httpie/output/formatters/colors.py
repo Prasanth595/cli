@@ -174,6 +174,7 @@ def get_lexer(
         for name in lexer_names:
             try:
                 lexer = pygments.lexers.get_lexer_by_name(name)
+                break
             except ClassNotFound:
                 pass
 
