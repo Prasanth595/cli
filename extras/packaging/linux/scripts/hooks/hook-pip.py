@@ -1,4 +1,3 @@
-from pathlib import Path
 from PyInstaller.utils.hooks import collect_all
 
 def hook(hook_api):
