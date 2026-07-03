@@ -116,7 +116,7 @@ def _escape_and_dedent(text: str) -> str:
 def to_man_page(program_name: str, spec: ParserSpec, *, is_top_level_cmd: bool = False) -> str:
     builder = ManPageBuilder()
     builder.add_comment(
-        f"This file is auto-generated from the parser declaration "
+        "This file is auto-generated from the parser declaration "
         + (f"in {Path(spec.source_file).relative_to(PROJECT_ROOT)} " if spec.source_file else "")
         + f"by {Path(__file__).relative_to(PROJECT_ROOT)}."
     )
