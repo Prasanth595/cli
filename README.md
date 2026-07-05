@@ -55,6 +55,18 @@ Please note we recently accidentally made this repo private for a moment, and Gi
 - [Installation instructions →](https://httpie.io/docs#installation)
 - [Full documentation →](https://httpie.io/docs)
 
+## Installation (alternative methods)
+
+
+### pipx (recommended for isolated Python CLI tools)
+
+pipx provides isolated environments for Python CLI applications:
+
+```bash
+pip install pipx
+pipx install httpie
+```
+
 ## Features
 
 - Expressive and intuitive syntax
