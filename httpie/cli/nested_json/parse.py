@@ -138,7 +138,7 @@ def tokenize(source: str) -> Iterator[Token]:
         kind = TokenKind.TEXT
         if not backslashes:
             for variation, kind in [
-                (int, TokenKind.NUMBER),
+                (parse_number, TokenKind.NUMBER),
                 (check_escaped_int, TokenKind.TEXT),
             ]:
                 try:
@@ -176,6 +176,22 @@ def tokenize(source: str) -> Iterator[Token]:
         cursor += 1
 
     yield from send_buffer()
+
+
+def parse_number(value: str) -> int:
+    """Parse ``value`` as an integer, but only when it is written in its
+    canonical form.
+
+    Unlike the built-in ``int()``, this rejects representations such as
+    ``007`` (leading zeros), ``1_000`` (digit-group separators), ``+5``
+    (explicit sign) or values padded with whitespace. Keeping those as plain
+    text preserves numeric-looking object keys verbatim instead of silently
+    normalizing them (e.g. ``007`` used to become ``7``).
+    """
+    number = int(value)
+    if value != str(number):
+        raise ValueError('Not a canonical integer')
+    return number
 
 
 def check_escaped_int(value: str) -> str:
