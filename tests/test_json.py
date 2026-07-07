@@ -440,6 +440,15 @@ def test_complex_json_arguments_with_non_json(httpbin, request_type, value):
             },
         ),
         (
+            # Numeric-looking keys are only treated as array indexes when
+            # written in their canonical form. Non-canonical variants (leading
+            # zeros, digit separators, explicit signs, surrounding whitespace)
+            # are kept verbatim as object keys instead of being normalized by
+            # `int()` (e.g. `007` must not become `7`).
+            ['007=1', '00=2', '1_000=3', '+5=4', 'x[007]=6'],
+            {'007': '1', '00': '2', '1_000': '3', '+5': '4', 'x': {'007': '6'}},
+        ),
+        (
             [':={"foo": {"bar": "baz"}}', 'top=val'],
             {'': {'foo': {'bar': 'baz'}}, 'top': 'val'},
         ),
