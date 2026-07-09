@@ -1,4 +1,5 @@
 import argparse
+from argparse import ArgumentError
 from typing import Any, Callable, Generic, Iterator, Iterable, Optional, TypeVar
 
 T = TypeVar('T')
@@ -44,7 +45,6 @@ class LazyChoices(argparse.Action, Generic[T]):
         self._help: Optional[str] = None
         self._obj: Optional[Iterable[T]] = None
         super().__init__(*args, **kwargs)
-        self.choices = self
 
     def load(self) -> T:
         if self._obj is None or not self.cache:
@@ -76,4 +76,9 @@ class LazyChoices(argparse.Action, Generic[T]):
             return iter(self.load())
 
     def __call__(self, parser, namespace, values, option_string=None):
+        if values not in self.load():
+            raise ArgumentError(
+                self,
+                f"invalid choice: {values!r} (choose from {self.load()!r})"
+            )
         setattr(namespace, self.dest, values)
