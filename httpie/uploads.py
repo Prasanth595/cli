@@ -233,6 +233,14 @@ def get_multipart_data_and_content_type(
     content_type: str = None,
 ) -> Tuple['MultipartEncoder', str]:
     from requests_toolbelt import MultipartEncoder
+    from .utils import parse_content_type_header
+
+    if not boundary and content_type:
+        # Honor a boundary specified via an explicit `Content-Type` header
+        # (e.g. `Content-Type:multipart/form-data; boundary=xoxo`) so that the
+        # body delimiter matches the boundary declared in the header.
+        _, ct_params = parse_content_type_header(content_type)
+        boundary = ct_params.get('boundary')
 
     encoder = MultipartEncoder(
         fields=data.items(),
