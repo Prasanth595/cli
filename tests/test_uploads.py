@@ -300,6 +300,24 @@ class TestMultipartFormDataFileUpload:
         assert f'multipart/magic; boundary={boundary_in_header}' in r
         assert r.count(boundary_in_body) == 3
 
+    def test_multipart_boundary_from_content_type_without_flag(self, httpbin):
+        # A boundary specified only via an explicit Content-Type header
+        # (no --boundary) must be used for the body delimiter too.
+        boundary = 'HTTPIE_FTW'
+        r = http(
+            '--print=HB',
+            '--check-status',
+            '--multipart',
+            httpbin + '/post',
+            f'Content-Type: multipart/form-data; boundary={boundary}',
+            'AAAA=AAA',
+            'BBB=BBB',
+        )
+        assert f'multipart/form-data; boundary={boundary}' in r
+        # 1 in the header + 3 body delimiters (two parts + closing). Without the
+        # fix the body uses a random boundary and this count is 1.
+        assert r.count(boundary) == 4
+
     def test_multipart_chunked(self, httpbin_with_chunked_support):
         r = http(
             '--verbose',
