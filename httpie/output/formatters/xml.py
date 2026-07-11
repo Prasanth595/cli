@@ -21,9 +21,15 @@ def parse_declaration(raw_body: str) -> Optional[str]:
     body = raw_body.strip()
     # XMLDecl ::= '<?xml' DECL_CONTENT '?>'
     if body.startswith(XML_DECLARATION_OPEN):
-        end = body.find(XML_DECLARATION_CLOSE)
-        if end != -1:
-            return body[:end + len(XML_DECLARATION_CLOSE)]
+        # The declaration target is exactly ``xml``; a processing instruction
+        # such as ``<?xml-stylesheet?>`` or ``<?xml-model?>`` merely starts with
+        # it and must not be treated as the declaration (which would duplicate
+        # the instruction in the prettified output).
+        rest = body[len(XML_DECLARATION_OPEN):]
+        if rest[:1] in ('', ' ', '\t', '\r', '\n', '?'):
+            end = body.find(XML_DECLARATION_CLOSE)
+            if end != -1:
+                return body[:end + len(XML_DECLARATION_CLOSE)]
 
 
 def pretty_xml(document: 'Document',

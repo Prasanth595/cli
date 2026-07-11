@@ -97,3 +97,16 @@ def test_invalid_xml(file):
     # No formatting done, data is simply printed as-is.
     r = http(DUMMY_URL)
     assert xml_data in r
+
+
+@pytest.mark.parametrize('target', ['xml-stylesheet', 'xml-model'])
+def test_xml_leading_processing_instruction_not_duplicated(target):
+    """A leading ``<?xml-...?>`` processing instruction (whose target merely
+    begins with ``xml``) must not be misdetected as the XML declaration and
+    duplicated in the prettified output.
+    """
+    from httpie.output.formatters.xml import XMLFormatter
+    formatter = XMLFormatter(format_options={'xml': {'format': True, 'indent': 2}})
+    body = f'<?{target} href="x"?><root><item>x</item></root>'
+    formatted = formatter.format_body(body, 'application/xml')
+    assert formatted.count(f'<?{target}') == 1
