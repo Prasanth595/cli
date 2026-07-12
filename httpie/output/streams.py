@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from itertools import chain
+import re
 from typing import Callable, Iterable, Optional, Union
 
 from .processing import Conversion, Formatting
@@ -7,6 +8,27 @@ from ..context import Environment
 from ..encoding import smart_decode, smart_encode, UTF8
 from ..models import HTTPMessage, OutputOptions
 from ..utils import parse_content_type_header
+
+
+# Regex to match terminal control sequences that could be exploited
+# for display manipulation, title injection, or clipboard injection.
+# Preserves \t, \n, \r which are needed for normal text display.
+CONTROL_CHAR_RE = re.compile(
+    br'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]'   # C0 control chars (except \t, \n, \r)
+    br'|\x1b(?:\[[^\x40-\x7e]*[\x40-\x7e]'   # CSI sequences (e.g., \x1b[31m)
+    br'|\][^\x07]*\x07'                        # OSC sequences (e.g., title change)
+    br'|.)'                                    # Any other ESC sequence
+)
+
+
+def _sanitize_for_terminal(data: bytes) -> bytes:
+    """Strip terminal escape sequences from untrusted response data.
+
+    Prevents a malicious server from injecting ANSI/OSC sequences
+    that could manipulate the terminal display, title, or clipboard.
+    Only applied when stdout is a TTY.
+    """
+    return CONTROL_CHAR_RE.sub(b'', data)
 
 
 BINARY_SUPPRESSED_NOTICE = (
@@ -46,15 +68,22 @@ class BaseStream(metaclass=ABCMeta):
         self.msg = msg
         self.output_options = output_options
         self.on_body_chunk_downloaded = on_body_chunk_downloaded
+        self._stdout_isatty = False
         self.extra_options = kwargs
 
     def get_headers(self) -> bytes:
         """Return the headers' bytes."""
-        return self.msg.headers.encode()
+        headers = self.msg.headers.encode()
+        if self._stdout_isatty:
+            headers = _sanitize_for_terminal(headers)
+        return headers
 
     def get_metadata(self) -> bytes:
         """Return the message metadata."""
-        return self.msg.metadata.encode()
+        metadata = self.msg.metadata.encode()
+        if self._stdout_isatty:
+            metadata = _sanitize_for_terminal(metadata)
+        return metadata
 
     @abstractmethod
     def iter_body(self) -> Iterable[bytes]:
@@ -120,6 +149,7 @@ class EncodedStream(BaseStream):
         **kwargs
     ):
         super().__init__(**kwargs)
+        self._stdout_isatty = env.stdout_isatty
         if mime_overwrite:
             self.mime = mime_overwrite
         else:
@@ -140,7 +170,10 @@ class EncodedStream(BaseStream):
             if b'\0' in line:
                 raise BinarySuppressedError()
             line = self.decode_chunk(line)
-            yield smart_encode(line, self.output_encoding) + lf
+            encoded = smart_encode(line, self.output_encoding) + lf
+            if self._stdout_isatty:
+                encoded = _sanitize_for_terminal(encoded)
+            yield encoded
 
     def decode_chunk(self, raw_chunk: str) -> str:
         chunk, guessed_encoding = smart_decode(raw_chunk, self.encoding)
