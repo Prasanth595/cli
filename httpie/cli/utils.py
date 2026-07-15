@@ -44,7 +44,6 @@ class LazyChoices(argparse.Action, Generic[T]):
         self._help: Optional[str] = None
         self._obj: Optional[Iterable[T]] = None
         super().__init__(*args, **kwargs)
-        self.choices = self
 
     def load(self) -> T:
         if self._obj is None or not self.cache:
@@ -76,4 +75,10 @@ class LazyChoices(argparse.Action, Generic[T]):
             return iter(self.load())
 
     def __call__(self, parser, namespace, values, option_string=None):
+        if self.load() is not None and values not in self.load():
+            raise argparse.ArgumentError(
+                self,
+                f"invalid choice: {values!r} "
+                f"(choose from {{{', '.join(str(c) for c in self.load())}}})",
+            )
         setattr(namespace, self.dest, values)
