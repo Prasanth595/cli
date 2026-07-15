@@ -37,13 +37,18 @@ class LazyChoices(argparse.Action, Generic[T]):
         **kwargs
     ) -> None:
         self.getter = getter
-        self.help_formatter = help_formatter
         self.sort = sort
         self.cache = cache
         self.isolation_mode = isolation_mode
         self._help: Optional[str] = None
         self._obj: Optional[Iterable[T]] = None
+        # Defer setting help_formatter until after super().__init__()
+        # to prevent argparse._check_help (Python 3.14+) from triggering
+        # the lazy getter during argument registration.
+        deferred_formatter = help_formatter
+        self.help_formatter = None
         super().__init__(*args, **kwargs)
+        self.help_formatter = deferred_formatter
         self.choices = self
 
     def load(self) -> T:
