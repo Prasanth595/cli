@@ -162,6 +162,13 @@ def process_file_upload_arg(arg: KeyValueArg) -> Tuple[str, IO, str]:
     )
 
 
+def close_request_files(files: RequestFilesDict) -> None:
+    for value in files.values():
+        values = value if isinstance(value, list) else [value]
+        for _, file, _ in values:
+            file.close()
+
+
 def convert_json_value_to_form_if_needed(in_json_mode: bool, processor: Callable[[KeyValueArg], JSONType]) -> Callable[[], str]:
     """
     We allow primitive values to be passed to forms via JSON key/value syntax.

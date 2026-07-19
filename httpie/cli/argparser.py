@@ -194,8 +194,19 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
         return self.args
 
     def _process_request_type(self):
+        # JSON is the implicit default request type: when the user passes no
+        # --json/--form/--multipart flag (so request_type is None), we still
+        # want the data item parser to treat key=value pairs as JSON, the
+        # request serializer to send a JSON body, and the default Content-Type
+        # to be application/json. RequestItems already encodes that in
+        # `is_json` (request_type is None or RequestType.JSON); mirror it on
+        # the args namespace so client.make_default_headers / make_request_kwargs
+        # can take the same code path as an explicit --json. Without this,
+        # `https URL 'h: v' x=1` would set Content-Type only because of the
+        # data item, not because of the implicit JSON mode, and a request with
+        # only headers would silently lose the Content-Type/Accept defaults.
         request_type = self.args.request_type
-        self.args.json = request_type is RequestType.JSON
+        self.args.json = request_type is None or request_type is RequestType.JSON
         self.args.multipart = request_type is RequestType.MULTIPART
         self.args.form = request_type in {
             RequestType.FORM,

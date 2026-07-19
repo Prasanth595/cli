@@ -28,6 +28,31 @@ from .internal.update_warnings import check_updates
 from .internal.daemon_runner import is_daemon_mode, run_daemon_task
 
 
+def close_request_files(args, stdin=None):
+    handles = []
+    seen = set()
+
+    def collect(value):
+        if isinstance(value, (list, tuple)):
+            if len(value) == 3 and hasattr(value[1], 'close'):
+                collect(value[1])
+            else:
+                for item in value:
+                    collect(item)
+        elif hasattr(value, 'close') and value is not stdin and id(value) not in seen:
+            seen.add(id(value))
+            handles.append(value)
+
+    for value in getattr(args, 'files', {}).values():
+        collect(value)
+    for value in getattr(args, 'multipart_data', {}).values():
+        collect(value)
+    collect(getattr(args, 'data', None))
+
+    for handle in handles:
+        handle.close()
+
+
 # noinspection PyDefaultArgument
 def raw_main(
     parser: argparse.ArgumentParser,
@@ -263,6 +288,7 @@ def program(args: argparse.Namespace, env: Environment) -> ExitStatus:
     finally:
         if downloader and not downloader.finished:
             downloader.failed()
+        close_request_files(args, stdin=env.stdin)
         if args.output_file and args.output_file_specified:
             args.output_file.close()
 

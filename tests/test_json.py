@@ -581,3 +581,37 @@ def test_nested_json_errors(input_json, expected_error, httpbin):
 def test_nested_json_sparse_array(httpbin_both):
     r = http(httpbin_both + '/post', 'test[0]:=1', 'test[100]:=1')
     assert len(r.json['json']['test']) == 101
+
+class TestImplicitJsonDefaults:
+    """Regression tests for issue #1834: implicit --json should set the
+    Content-Type and Accept defaults even when the request has no data
+    items. The implicit mode is JSON (key=value becomes a JSON object),
+    so the contract should match what the user sees from explicit --json,
+    including the default headers."""
+
+    def test_content_type_set_with_only_header(self, httpbin):
+        # Use --check-status so an error status still yields r.json with
+        # headers, and target /get (GET) so the request does have a body
+        # echo. X-Test:abc is the only request item (a header). The
+        # implicit JSON mode should still set Content-Type and Accept.
+        r = http('--check-status', httpbin + '/get', 'X-Test:abc')
+        assert r.json['headers'].get('Content-Type') == 'application/json'
+        assert r.json['headers'].get('Accept') == 'application/json, */*;q=0.5'
+
+    def test_content_type_set_with_no_items(self, httpbin):
+        r = http(httpbin + '/get')
+        assert r.json['headers'].get('Content-Type') == 'application/json'
+        assert r.json['headers'].get('Accept') == 'application/json, */*;q=0.5'
+
+    def test_form_explicit_still_overrides(self, httpbin):
+        r = http('--form', httpbin + '/post', 'a=b')
+        assert r.json['headers'].get('Content-Type') == 'application/x-www-form-urlencoded; charset=utf-8'
+        # httpie does not set the JSON Accept for --form, so the value should
+        # not be the JSON_ACCEPT default. urllib3/requests may still attach
+        # its own Accept header on the wire, but it won't be the JSON one.
+        assert r.json['headers'].get('Accept') != 'application/json, */*;q=0.5'
+
+    def test_explicit_json_unchanged(self, httpbin):
+        r = http('--json', httpbin + '/get')
+        assert r.json['headers'].get('Content-Type') == 'application/json'
+        assert r.json['headers'].get('Accept') == 'application/json, */*;q=0.5'
