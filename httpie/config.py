@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 from . import __version__
 from .compat import is_windows
@@ -11,10 +11,37 @@ from .encoding import UTF8
 ENV_XDG_CONFIG_HOME = 'XDG_CONFIG_HOME'
 ENV_HTTPIE_CONFIG_DIR = 'HTTPIE_CONFIG_DIR'
 DEFAULT_CONFIG_DIRNAME = 'httpie'
+DEFAULT_CONFIG_FILENAME = 'config.json'
 DEFAULT_RELATIVE_XDG_CONFIG_HOME = Path('.config')
 DEFAULT_RELATIVE_LEGACY_CONFIG_DIR = Path('.httpie')
+DEFAULT_LOCAL_CONFIG_DIRNAME = '.httpie'
 DEFAULT_WINDOWS_CONFIG_DIR = Path(
     os.path.expandvars('%APPDATA%')) / DEFAULT_CONFIG_DIRNAME
+
+
+def find_local_config_dir(start_dir: Optional[Path] = None) -> Optional[Path]:
+    """
+    Return the path to a local (per-project) configuration directory,
+    or None if there isn’t one.
+
+    Look for a `.httpie` directory containing a `config.json` file
+    in `start_dir` (defaults to the current working directory) and,
+    recursively, in its parents. The nearest match wins.
+
+    The `config.json` file is required so that unrelated `.httpie`
+    directories don’t accidentally become the active configuration
+    directory.
+
+    """
+    try:
+        current_dir = (start_dir or Path.cwd()).resolve()
+    except OSError:
+        return None
+    for directory in (current_dir, *current_dir.parents):
+        candidate = directory / DEFAULT_LOCAL_CONFIG_DIRNAME
+        if (candidate / DEFAULT_CONFIG_FILENAME).is_file():
+            return candidate
+    return None
 
 
 def get_default_config_dir() -> Path:
@@ -36,21 +63,27 @@ def get_default_config_dir() -> Path:
     if env_config_dir:
         return Path(env_config_dir)
 
-    # 2. Windows
+    # 2. local per-project directory (a `.httpie/config.json` found
+    #    in the current working directory or one of its parents)
+    local_config_dir = find_local_config_dir()
+    if local_config_dir:
+        return local_config_dir
+
+    # 3. Windows
     if is_windows:
         return DEFAULT_WINDOWS_CONFIG_DIR
 
     home_dir = Path.home()
 
-    # 3. legacy ~/.httpie
+    # 4. legacy ~/.httpie
     legacy_config_dir = home_dir / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR
     if legacy_config_dir.exists():
         return legacy_config_dir
 
-    # 4. XDG
+    # 5. XDG
     xdg_config_home_dir = os.environ.get(
-        ENV_XDG_CONFIG_HOME,  # 4.1. explicit
-        home_dir / DEFAULT_RELATIVE_XDG_CONFIG_HOME  # 4.2. default
+        ENV_XDG_CONFIG_HOME,  # 5.1. explicit
+        home_dir / DEFAULT_RELATIVE_XDG_CONFIG_HOME  # 5.2. default
     )
     return Path(xdg_config_home_dir) / DEFAULT_CONFIG_DIRNAME
 
@@ -135,7 +168,7 @@ class BaseConfigDict(dict):
 
 
 class Config(BaseConfigDict):
-    FILENAME = 'config.json'
+    FILENAME = DEFAULT_CONFIG_FILENAME
     DEFAULTS = {
         'default_options': []
     }

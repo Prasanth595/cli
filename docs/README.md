@@ -2338,6 +2338,22 @@ $ export HTTPIE_CONFIG_DIR=/tmp/httpie
 $ http pie.dev/get
 ```
 
+### Project-local config directory
+
+HTTPie also looks for a project-local configuration: a `.httpie` directory containing a `config.json` file, located in the current working directory or any of its parent directories (similar to how `.npmrc` or `.git` are discovered). The nearest match wins, and it takes precedence over the global configuration:
+
+```bash
+$ mkdir .httpie
+$ echo '{"default_options": ["--auth=user:password"]}' > .httpie/config.json
+$ http localhost:3000/api/endpoint  # picks up the local config
+```
+
+This makes it possible to keep per-project defaults — such as authentication for a local development server — scoped to that project’s directory tree, without polluting the global config or affecting requests made elsewhere.
+
+A `.httpie` directory without a `config.json` file inside is ignored. The `$HTTPIE_CONFIG_DIR` environment variable, when set, takes precedence over the project-local discovery.
+
+Note that the active config directory also stores [sessions](#sessions), so named sessions created inside a project with a local config are scoped to that project.
+
 ### Configurable options
 
 Currently, HTTPie offers a single configurable option:
