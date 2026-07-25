@@ -55,6 +55,17 @@ Please note we recently accidentally made this repo private for a moment, and Gi
 - [Installation instructions →](https://httpie.io/docs#installation)
 - [Full documentation →](https://httpie.io/docs)
 
+```bash
+# pip
+pip install httpie
+
+# pipx (recommended for CLI tools)
+pipx install httpie
+
+# Homebrew
+brew install httpie
+```
+
 ## Features
 
 - Expressive and intuitive syntax
