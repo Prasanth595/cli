@@ -214,7 +214,7 @@ def transform_headers(
     prepared_request: requests.PreparedRequest
 ) -> None:
     """Apply various transformations on top of the `prepared_requests`'s
-    headers to change the request prepreation behavior."""
+    headers to change the request preparation behavior."""
 
     # Remove 'Content-Length' when it is misplaced by requests.
     if (
@@ -237,6 +237,13 @@ def apply_missing_repeated_headers(
     """Update the given `prepared_request`'s headers with the original
     ones. This allows the requests to be prepared as usual, and then later
     merged with headers that are specified multiple times."""
+    
+    # Preserve Content-Type headers that were automatically set for JSON data
+    # to prevent them from being lost when there's only one custom header
+    json_content_type_preserved = False
+    if 'Content-Type' in prepared_request.headers:
+        if prepared_request.headers['Content-Type'] == JSON_CONTENT_TYPE:
+            json_content_type_preserved = True
 
     new_headers = HTTPHeadersDict(prepared_request.headers)
     for prepared_name, prepared_value in prepared_request.headers.items():
@@ -254,6 +261,15 @@ def apply_missing_repeated_headers(
             # overridden on the way, and we should preserve it.
             continue
 
+        # Special handling for Content-Type: preserve it when it was 
+        # automatically set for JSON data, even if it's overridden by custom headers
+        if (prepared_name.lower() == 'content-type' and 
+            prepared_value == JSON_CONTENT_TYPE and 
+            not json_content_type_preserved):
+            # Skip removing Content-Type if it's the JSON one that was auto-set
+            # and we're dealing with a case where custom headers might interfere
+            continue
+            
         new_headers.popone(prepared_name)
         new_headers.update(zip(original_keys, original_values))
 
