@@ -186,7 +186,7 @@ def build_requests_session(
 
 def dump_request(kwargs: dict):
     sys.stderr.write(
-        f'\n>>> requests.request(**{repr_dict(kwargs)})\n\n')
+        f'\\n>>> requests.request(**{repr_dict(kwargs)})\\n\\n')
 
 
 def finalize_headers(headers: HTTPHeadersDict) -> HTTPHeadersDict:
@@ -239,6 +239,13 @@ def apply_missing_repeated_headers(
     merged with headers that are specified multiple times."""
 
     new_headers = HTTPHeadersDict(prepared_request.headers)
+    
+    # Preserve Content-Type headers for JSON data even when there's only one custom header
+    # Check if Content-Type was set automatically for JSON data
+    auto_set_json_content_type = False
+    if 'Content-Type' in prepared_request.headers and prepared_request.headers['Content-Type'] == JSON_CONTENT_TYPE:
+        auto_set_json_content_type = True
+    
     for prepared_name, prepared_value in prepared_request.headers.items():
         if prepared_name not in original_headers:
             continue
@@ -254,6 +261,13 @@ def apply_missing_repeated_headers(
             # overridden on the way, and we should preserve it.
             continue
 
+        # Special handling for Content-Type when it was automatically set for JSON
+        # This ensures we don't lose the automatic JSON Content-Type when there's 
+        # only one custom header
+        if prepared_name.lower() == 'content-type' and auto_set_json_content_type:
+            # Skip removing Content-Type if it was set automatically for JSON
+            continue
+            
         new_headers.popone(prepared_name)
         new_headers.update(zip(original_keys, original_values))
 
