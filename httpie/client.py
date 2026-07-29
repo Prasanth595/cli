@@ -268,7 +268,9 @@ def make_default_headers(args: argparse.Namespace) -> HTTPHeadersDict:
     auto_json = args.data and not args.form
     if args.json or auto_json:
         default_headers['Accept'] = JSON_ACCEPT
-        if args.json or (auto_json and args.data):
+        # Always set Content-Type when we have JSON data, regardless of explicit --json flag
+        # This ensures consistent behavior with multiple headers
+        if args.json or (auto_json and args.data) or (args.data and isinstance(args.data, dict)):
             default_headers['Content-Type'] = JSON_CONTENT_TYPE
 
     elif args.form and not args.files:
