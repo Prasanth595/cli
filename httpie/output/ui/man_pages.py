@@ -1,7 +1,9 @@
 """Logic for checking and displaying man pages."""
 
-import subprocess
 import os
+import subprocess
+import sys
+
 from httpie.context import Environment
 
 
@@ -18,7 +20,7 @@ def is_available(program: str) -> bool:
     Check whether `program`'s man pages are available on this system.
 
     """
-    if NO_MAN_PAGES or os.system == 'nt':
+    if NO_MAN_PAGES or sys.platform == 'win32':
         return False
     try:
         process = subprocess.run(
