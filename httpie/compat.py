@@ -109,5 +109,15 @@ def ensure_default_certs_loaded(ssl_context: SSLContext) -> None:
 
     """
     if hasattr(ssl_context, 'load_default_certs'):
+        # First try to load default certs
         if not ssl_context.get_ca_certs():
-            ssl_context.load_default_certs()
+            try:
+                ssl_context.load_default_certs()
+            except Exception:
+                # If that fails, try to load from certifi if available
+                try:
+                    import certifi
+                    ssl_context.load_verify_locations(certifi.where())
+                except ImportError:
+                    # If certifi is not available, we can't do much more
+                    pass
