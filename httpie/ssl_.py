@@ -82,6 +82,9 @@ class HTTPieHTTPSAdapter(HTTPAdapter):
             cert_reqs=ssl.CERT_REQUIRED if verify else ssl.CERT_NONE
         )
         ensure_default_certs_loaded(ssl_context)
+        # Also load system default certificates if available (e.g., /etc/ssl/certs)
+        if hasattr(ssl_context, 'load_default_certs'):
+            ssl_context.load_default_certs()
         return ssl_context
 
     @classmethod
