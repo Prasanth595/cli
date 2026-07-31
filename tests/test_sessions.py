@@ -402,6 +402,31 @@ class TestExpiredCookies(CookieTestBase):
         assert get_expired_cookies(cookies, now=None) == expected_expired
 
     @pytest.mark.parametrize(
+        'max_age, expected_expired',
+        [
+            # RFC 6265 5.2.2: "If delta-seconds is less than or equal to zero,
+            # let expiry-time be the earliest representable date and time."
+            ('0', True),
+            ('-1', True),
+            ('-100', True),
+            # Positive ages are in the future, so not expired.
+            ('3600', False),
+            # Unparseable values must be ignored rather than raising.
+            ('', False),
+            ('abc', False),
+            ('1.5', False),
+            ('--1', False),
+        ]
+    )
+    def test_get_expired_cookies_using_non_positive_max_age(self, max_age,
+                                                            expected_expired):
+        cookies = f'one=two; Max-Age={max_age}; path=/; domain=.tumblr.com'
+        expired = get_expired_cookies(cookies, now=None)
+        assert bool(expired) is expected_expired
+        if expected_expired:
+            assert expired == [{'name': 'one', 'path': '/'}]
+
+    @pytest.mark.parametrize(
         'cookies, now, expected_expired',
         [
             (
