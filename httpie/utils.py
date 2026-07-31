@@ -187,17 +187,41 @@ def get_expired_cookies(
 
 def _max_age_to_expires(cookies, now):
     """
-    Translate `max-age` into `expires` for Requests to take it into account.
+    Translate `max-age` into `expires` so an expired cookie is recognised as such.
 
-    HACK/FIXME: <https://github.com/psf/requests/issues/5743>
+    Parsing follows RFC 6265 section 5.2.2: a `delta-seconds` of zero or less means the
+    cookie expires immediately, so negative values must be honoured and not just zero.
+
+    Why HTTPie does this itself, and when it still matters:
+
+    Originally none of it was handled downstream, which is what #998 reported. The
+    upstream report at <https://github.com/psf/requests/issues/5743> was declined as a
+    no-op -- Requests considers the standard library's behaviour correct -- so no upstream
+    change is coming and this is not a workaround awaiting removal.
+
+    It is, however, only load-bearing for session files in the pre-3.1.0 layout. Those
+    stored cookies as a dict with no per-cookie domain, and `http.cookiejar` deletes an
+    existing cookie via `clear(domain, path, name)`, so nothing matched and the cookie
+    survived. Since 3.1.0 the layout binds each cookie to a domain (#1312), so the
+    cookiejar removes expired cookies on its own -- for those sessions this function is
+    redundant.
+
+    Dropping it therefore means dropping support for the pre-3.1.0 layout first; see
+    `httpie.legacy.v3_1_0_session_cookie_format`, which still reads it.
 
     """
     for cookie in cookies:
         if 'expires' in cookie:
             continue
         max_age = cookie.get('max-age')
-        if max_age and max_age.isdigit():
-            cookie['expires'] = now + float(max_age)
+        try:
+            # `str.isdigit()` would reject a negative delta-seconds, but RFC 6265
+            # section 5.2.2 requires a value of zero or less to expire the cookie
+            # immediately — that is how servers delete cookies with `Max-Age=-1`.
+            delta_seconds = int(max_age)
+        except (TypeError, ValueError):
+            continue
+        cookie['expires'] = now + delta_seconds
 
 
 def parse_content_type_header(header):
