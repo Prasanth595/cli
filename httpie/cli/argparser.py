@@ -45,7 +45,7 @@ class HTTPieHelpFormatter(RawDescriptionHelpFormatter):
         super().__init__(*args, **kwargs)
 
     def _split_lines(self, text, width):
-        text = dedent(text).strip() + '\n\n'
+        text = dedent(text).strip() + '\\n\\n'
         return text.splitlines()
 
     def add_usage(self, usage, actions, groups, prefix=None):
@@ -72,7 +72,7 @@ class HTTPieHelpFormatter(RawDescriptionHelpFormatter):
             usage,
             displayed_actions,
             groups,
-            prefix="usage:\n    "
+            prefix="usage:\\n    "
         )
 
 
@@ -94,7 +94,7 @@ class BaseHTTPieArgumentParser(argparse.ArgumentParser):
         namespace=None
     ) -> argparse.Namespace:
         self.env = env
-        self.args, no_options = self.parse_known_args(args, namespace)
+        self.args, no_options = self.parse_intermixed_args(args, namespace)
         if self.args.debug:
             self.args.traceback = True
         self.has_stdin_data = (
@@ -126,9 +126,9 @@ class BaseHTTPieArgumentParser(argparse.ArgumentParser):
 
 
 class HTTPieManagerArgumentParser(BaseHTTPieArgumentParser):
-    def parse_known_args(self, args=None, namespace=None):
+    def parse_intermixed_args(self, args=None, namespace=None):
         try:
-            return super().parse_known_args(args, namespace)
+            return super().parse_intermixed_args(args, namespace)
         except SystemExit as exc:
             if not hasattr(self, 'root') and exc.code == 2:  # Argument Parser Error
                 raise argparse.ArgumentError(None, None)
@@ -156,7 +156,7 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
     ) -> argparse.Namespace:
         self.env = env
         self.env.args = namespace = namespace or argparse.Namespace()
-        self.args, no_options = super().parse_known_args(args, namespace)
+        self.args, no_options = super().parse_intermixed_args(args, namespace)
         if self.args.debug:
             self.args.traceback = True
         self.has_stdin_data = (
@@ -213,7 +213,7 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
                 scheme = self.args.default_scheme + '://'
 
             # See if we're using curl style shorthand for localhost (:3000/foo)
-            shorthand = re.match(r'^:(?!:)(\d*)(/?.*)$', self.args.url)
+            shorthand = re.match(r'^:(?!:)(\\d*)(/?.*)$', self.args.url)
             if shorthand:
                 port = shorthand.group(1)
                 rest = shorthand.group(2)
@@ -306,7 +306,7 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
             if (not self.args.ignore_netrc
                     and self.args.auth is None
                     and plugin.netrc_parse):
-                # Only host needed, so it’s OK URL not finalized.
+                # Only host needed, so it's OK URL not finalized.
                 netrc_credentials = get_netrc_auth(self.args.url)
                 if netrc_credentials:
                     self.args.auth = AuthCredentials(
@@ -377,7 +377,7 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
                 invalid.append(option)
 
         if invalid:
-            self.error(f'unrecognized arguments: {" ".join(invalid)}')
+            self.error(f'unrecognized arguments: {\" \".join(invalid)}')
 
     def _body_from_file(self, fd):
         """Read the data from a file-like object.
@@ -591,7 +591,7 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
             whitelist.add(exception.args[0].option_strings[0])
 
         usage_text = Text('usage', style='bold')
-        usage_text.append(':\n    ')
+        usage_text.append(':\\n    ')
         usage_text.append(rich_help.to_usage(self.spec, whitelist=whitelist))
         self.env.rich_error_console.print(usage_text)
 
