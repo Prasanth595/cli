@@ -41,7 +41,7 @@ def _fetch_updates(env: Environment) -> str:
     file = env.config.version_info_file
     data = _read_data_error_free(file)
 
-    response = requests.get(PACKAGE_INDEX_LINK, verify=False)
+    response = requests.get(PACKAGE_INDEX_LINK, verify=False, timeout=30)
     response.raise_for_status()
 
     data.setdefault('last_warned_date', None)
