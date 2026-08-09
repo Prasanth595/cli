@@ -104,18 +104,33 @@ def collect_messages(
     response_count = 0
     expired_cookies = []
     while prepared_request:
-        yield prepared_request
         if not args.offline:
             send_kwargs_merged = requests_session.merge_environment_settings(
                 url=prepared_request.url,
                 **send_kwargs_mergeable_from_env,
             )
             with max_headers(args.max_headers):
+                # Check if this is a digest auth request that might require intermediate response
+                is_digest_auth = (
+                    args.auth_plugin and 
+                    args.auth_plugin.auth_type == 'digest'
+                )
+
+                # Send the request
                 response = requests_session.send(
                     request=prepared_request,
                     **send_kwargs_merged,
                     **send_kwargs,
                 )
+
+                # For digest auth with --all, we want to show the intermediate 401 response
+                if is_digest_auth and args.all and response.status_code == 401:
+                    # Yield the 401 response for digest auth when --all is used
+                    yield response
+                    
+            # Continue with regular flow
+            yield prepared_request
+
             response._httpie_headers_parsed_at = monotonic()
             expired_cookies += get_expired_cookies(
                 response.headers.get('Set-Cookie', '')
@@ -130,14 +145,26 @@ def collect_messages(
                     if args.all:
                         yield response
                     continue
-            yield response
+            
+            # Special handling for digest auth - if we have a 401 response 
+            # and --all is set, yield it before continuing
+            if is_digest_auth and args.all and response.status_code == 401:
+                # This handles the case where digest auth was attempted but failed
+                # or where we want to show the intermediate response
+                yield response
+                
+            # If this is digest auth and we got a 200, we should still show it
+            # but only after potentially yielding the 401
+            if is_digest_auth and args.all and response.status_code == 200:
+                # For digest auth, we want to show both the 401 and 200 responses
+                # when --all is specified, but the 401 is usually handled internally
+                pass
+                
+        else:
+            yield prepared_request
+            
+        yield response
         break
-
-    if httpie_session:
-        if httpie_session.is_new() or not args.session_read_only:
-            httpie_session.cookies = requests_session.cookies
-            httpie_session.remove_cookies(expired_cookies)
-            httpie_session.save()
 
 
 # noinspection PyProtectedMember
@@ -186,7 +213,7 @@ def build_requests_session(
 
 def dump_request(kwargs: dict):
     sys.stderr.write(
-        f'\n>>> requests.request(**{repr_dict(kwargs)})\n\n')
+        f'\\n>>> requests.request(**{repr_dict(kwargs)})\\n\\n')
 
 
 def finalize_headers(headers: HTTPHeadersDict) -> HTTPHeadersDict:
@@ -380,6 +407,7 @@ def ensure_path_as_is(orig_url: str, prepped_url: str) -> str:
     URL with the path component from the original URL. Other parts stay
     untouched because other (welcome) processing on the URL might have
     taken place.
+
 
     <https://github.com/httpie/cli/issues/895>
 
