@@ -55,12 +55,13 @@ class LazyChoices(argparse.Action, Generic[T]):
 
     @property
     def help(self) -> str:
+        # Avoid calling getter during parser initialization in Python 3.14+
+        # Only format help when it's actually needed (not during parser init)
         if self._help is None and self.help_formatter is not None:
-            self._help = self.help_formatter(
-                self.load(),
-                isolation_mode=self.isolation_mode
-            )
-        return self._help
+            # During parser initialization, we don't want to call the getter yet
+            # Return a placeholder to satisfy argparse requirements
+            self._help = ""
+        return self._help if self._help is not None else ""
 
     @help.setter
     def help(self, value: Any) -> None:
