@@ -2,11 +2,13 @@
 
 import subprocess
 import os
+import sys
 from httpie.context import Environment
 
 
 MAN_COMMAND = 'man'
 NO_MAN_PAGES = os.getenv('HTTPIE_NO_MAN_PAGES', False)
+
 
 # On some systems, HTTP(n) might exist, but we are only interested in HTTP(1).
 # For more information on man page sections: <https://unix.stackexchange.com/a/138643>
@@ -18,7 +20,7 @@ def is_available(program: str) -> bool:
     Check whether `program`'s man pages are available on this system.
 
     """
-    if NO_MAN_PAGES or os.system == 'nt':
+    if NO_MAN_PAGES or sys.platform == 'win32':
         return False
     try:
         process = subprocess.run(
