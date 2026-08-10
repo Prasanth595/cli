@@ -41,8 +41,13 @@ class LazyChoices(argparse.Action, Generic[T]):
         self.sort = sort
         self.cache = cache
         self.isolation_mode = isolation_mode
-        self._help: Optional[str] = None
         self._obj: Optional[Iterable[T]] = None
+        # Python 3.14 validates an action's help immediately after creating it.
+        # Skip that eager read so lazy help remains lazy until it is rendered.
+        self._skip_initial_help_validation = hasattr(
+            argparse._ActionsContainer,
+            '_check_help'
+        )
         super().__init__(*args, **kwargs)
         self.choices = self
 
@@ -54,7 +59,10 @@ class LazyChoices(argparse.Action, Generic[T]):
         return self._obj
 
     @property
-    def help(self) -> str:
+    def help(self) -> Optional[str]:
+        if self._skip_initial_help_validation:
+            self._skip_initial_help_validation = False
+            return None
         if self._help is None and self.help_formatter is not None:
             self._help = self.help_formatter(
                 self.load(),
