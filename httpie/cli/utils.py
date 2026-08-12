@@ -1,4 +1,5 @@
 import argparse
+import sys
 from typing import Any, Callable, Generic, Iterator, Iterable, Optional, TypeVar
 
 T = TypeVar('T')
@@ -54,12 +55,26 @@ class LazyChoices(argparse.Action, Generic[T]):
         return self._obj
 
     @property
-    def help(self) -> str:
+    def help(self) -> Optional[str]:
+        # Python 3.14's argparse calls ``_check_help`` during
+        # ``add_argument``, which accesses ``action.help``. We must not
+        # trigger the lazy getter at that point. Detect the validation
+        # phase by looking for ``_check_help`` on the call stack; in any
+        # other context (e.g. rendering ``--help``) we lazily compute the
+        # help string via ``help_formatter``.
         if self._help is None and self.help_formatter is not None:
-            self._help = self.help_formatter(
-                self.load(),
-                isolation_mode=self.isolation_mode
-            )
+            frame = sys._getframe(1)
+            in_check_help = False
+            while frame is not None:
+                if frame.f_code.co_name == "_check_help":
+                    in_check_help = True
+                    break
+                frame = frame.f_back
+            if not in_check_help:
+                self._help = self.help_formatter(
+                    self.load(),
+                    isolation_mode=self.isolation_mode
+                )
         return self._help
 
     @help.setter
