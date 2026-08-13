@@ -5,7 +5,7 @@ import re
 import sys
 from argparse import RawDescriptionHelpFormatter
 from textwrap import dedent
-from urllib.parse import urlsplit, unquote
+from urllib.parse import unquote, urlsplit
 
 from requests.utils import get_netrc_auth
 
