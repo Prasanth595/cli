@@ -451,6 +451,35 @@ class TestFormatOptions:
             parse_format_options(s=options_string, defaults=defaults)
 
     @pytest.mark.parametrize(
+        'options_string, expected_error',
+        [
+            ('json', 'invalid option'),
+            ('json.nope:1', 'invalid key'),
+            ('json.indent:nope', "invalid value 'nope'"),
+        ]
+    )
+    def test_invalid_format_options_are_reported_as_cli_errors(
+        self, options_string, expected_error
+    ):
+        # An invalid --format-options value must produce a regular CLI error,
+        # not an unhandled `argparse.ArgumentTypeError` traceback.
+        r = unhandled = None
+        try:
+            r = http(
+                '--offline', f'--format-options={options_string}', DUMMY_URL,
+                tolerate_error_exit_status=True,
+            )
+        except Exception as exc:  # noqa: BLE001
+            unhandled = exc
+
+        assert unhandled is None, (
+            f'unhandled {type(unhandled).__name__}: {unhandled}'
+        )
+        assert r.exit_status == ExitStatus.ERROR
+        assert '--format-options' in r.stderr
+        assert expected_error in r.stderr
+
+    @pytest.mark.parametrize(
         'args, expected_format_options',
         [
             (
