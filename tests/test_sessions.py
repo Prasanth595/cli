@@ -850,3 +850,11 @@ def test_secure_cookies_on_localhost(mock_env, tmp_path, server, expected_cookie
         server + '/cookies'
     )
     assert r.json == {'cookies': expected_cookies}
+
+
+def test_is_anonymous_session_cross_platform():
+    from httpie.sessions import is_anonymous_session
+    assert is_anonymous_session('custom/path/session.json')
+    assert is_anonymous_session('custom\\path\\session.json')
+    assert not is_anonymous_session('my_named_session')
+

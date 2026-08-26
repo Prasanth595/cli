@@ -40,7 +40,7 @@ DEFAULT_COOKIE_PATH = '/'
 
 
 def is_anonymous_session(session_name: str) -> bool:
-    return os.path.sep in session_name
+    return os.path.sep in session_name or bool(os.path.altsep and os.path.altsep in session_name)
 
 
 def session_hostname_to_dirname(hostname: str, session_name: str) -> str:
