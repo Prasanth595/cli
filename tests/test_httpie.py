@@ -143,6 +143,26 @@ def test_form_POST_file_redirected_stdin(httpbin):
     assert 'cannot be mixed' in r.stderr
 
 
+def test_option_between_method_and_url_reports_a_clear_error():
+    """
+    https://github.com/httpie/cli/issues/1614
+
+    An option sitting between METHOD and URL splits the positional run
+    argparse sees into two, and on Python 3.13+ argparse fills each half
+    on its own: METHOD and URL absorb the first half, URL's real value
+    gets read back as a REQUEST_ITEM, and METHOD is left unset entirely.
+    That used to reach an internal assertion and crash with a bare
+    AssertionError instead of telling the caller what went wrong.
+    """
+    r = http(
+        'POST', '--auth-type', 'bearer', '--auth', 'token',
+        'http://example.org',
+        tolerate_error_exit_status=True,
+    )
+    assert r.exit_status == ExitStatus.ERROR
+    assert 'METHOD, URL and REQUEST_ITEM' in r.stderr
+
+
 def test_raw_POST_key_values_supplied(httpbin):
     r = http(
         '--raw',

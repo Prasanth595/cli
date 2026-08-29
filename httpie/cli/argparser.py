@@ -413,7 +413,20 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
         """
         if self.args.method is None:
             # Invoked as `http URL'.
-            assert not self.args.request_items
+            if self.args.request_items:
+                # An optional argument sitting between METHOD/URL and the
+                # first REQUEST_ITEM splits the positional run in two, and
+                # argparse fills each run's slots independently: METHOD
+                # and URL end up absorbing the first run between them,
+                # leaving REQUEST_ITEM to catch whatever comes after the
+                # split, which is why method lands as None here even
+                # though a request item was given.
+                self.error(
+                    'METHOD, URL and REQUEST_ITEM all have to sit next to '
+                    'each other with nothing else in between; move any '
+                    'other arguments before METHOD or after the last '
+                    'REQUEST_ITEM.'
+                )
             if self.has_input_data:
                 self.args.method = HTTP_POST
             else:
