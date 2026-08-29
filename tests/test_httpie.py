@@ -1,5 +1,6 @@
 """High-level tests."""
 import io
+import sys
 from unittest import mock
 
 import pytest
@@ -143,6 +144,15 @@ def test_form_POST_file_redirected_stdin(httpbin):
     assert 'cannot be mixed' in r.stderr
 
 
+@pytest.mark.skipif(
+    sys.version_info < (3, 13),
+    reason=(
+        "argparse only splits the positional run this way on 3.13+; "
+        "on earlier versions the same command is rejected upstream "
+        "with its own 'unrecognized arguments' error before _guess_method "
+        "ever runs, so there's nothing here for the fix to catch"
+    ),
+)
 def test_option_between_method_and_url_reports_a_clear_error():
     """
     https://github.com/httpie/cli/issues/1614
