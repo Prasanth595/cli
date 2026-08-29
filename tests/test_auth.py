@@ -80,6 +80,26 @@ def test_only_username_in_url(url):
     assert args.auth.password == ''
 
 
+@pytest.mark.parametrize(
+    'url, expected_username, expected_password',
+    [
+        # Percent-encoded userinfo must be decoded (https://github.com/httpie/httpie/issues/1623)
+        ('https://u%40d:1%3d2%3f@example.org/', 'u@d', '1=2?'),
+        ('https://user%40example.com:pa%2Fss@example.org/', 'user@example.com', 'pa/ss'),
+        # Plain (non-encoded) credentials must be unaffected
+        ('https://alice:secret@example.org/', 'alice', 'secret'),
+        ('https://alice@example.org/', 'alice', ''),
+    ],
+)
+def test_credentials_in_url_are_percent_decoded(url, expected_username, expected_password):
+    """Userinfo in the URL should be percent-decoded so reserved characters
+    can be supplied directly (curl-compatible). See httpie/httpie#1623."""
+    args = httpie.cli.definition.parser.parse_args(args=[url], env=MockEnvironment())
+    assert args.auth
+    assert args.auth.username == expected_username
+    assert args.auth.password == expected_password
+
+
 def test_missing_auth(httpbin):
     r = http(
         '--auth-type=basic',
