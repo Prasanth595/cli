@@ -230,6 +230,9 @@ def httpie_plugins(interface):
 def httpie_plugins_success(httpie_plugins):
     def runner(*args, cli_mode: bool = True):
         response = httpie_plugins(*args, cli_mode=True)
+        if response.exit_status != ExitStatus.SUCCESS:
+            print(response.stderr)
+            print(response.stdout)
         assert response.exit_status == ExitStatus.SUCCESS
         return response.splitlines()
     return runner

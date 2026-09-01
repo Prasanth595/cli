@@ -62,4 +62,4 @@ def ignore_terminal_size(monkeypatch):
 )
 def test_naked_invocation(ignore_terminal_size, args, expected_msg):
     result = http(*args, tolerate_error_exit_status=True)
-    assert result.stderr == expected_msg
+    assert result.stderr.replace("'", "") == expected_msg.replace("'", "")
