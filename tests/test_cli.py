@@ -317,6 +317,27 @@ class TestArgumentParser:
         ]
 
 
+class TestIntermixedOptions:
+    """Optional flags may appear before, between, or after positionals."""
+
+    @pytest.mark.parametrize('args', [
+        # Flag after URL (fails on Python < 3.13 with parse_known_args).
+        ['--offline', '--ignore-stdin', 'post', 'pie.dev/post', '-v',
+         'header1:xyz', 'x=1'],
+        # Flag between METHOD and URL (fails on all Python versions).
+        ['--offline', '--ignore-stdin', 'post', '-v', 'pie.dev/post',
+         'header1:xyz', 'x=1'],
+        # Flag before METHOD (already works).
+        ['--offline', '--ignore-stdin', '-v', 'post', 'pie.dev/post',
+         'header1:xyz', 'x=1'],
+    ])
+    def test_verbose_flag_position_keeps_request_items(self, args):
+        r = http(*args)
+        assert r.exit_status == ExitStatus.SUCCESS
+        assert 'header1: xyz' in r
+        assert '"x": "1"' in r
+
+
 class TestNoOptions:
 
     def test_valid_no_options(self, httpbin):
