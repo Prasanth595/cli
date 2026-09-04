@@ -554,8 +554,11 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
     def _process_format_options(self):
         format_options = self.args.format_options or []
         parsed_options = PARSED_DEFAULT_FORMAT_OPTIONS
-        for options_group in format_options:
-            parsed_options = parse_format_options(options_group, defaults=parsed_options)
+        try:
+            for options_group in format_options:
+                parsed_options = parse_format_options(options_group, defaults=parsed_options)
+        except argparse.ArgumentTypeError as ex:
+            self.error(str(ex))
         self.args.format_options = parsed_options
 
     def print_manual(self):
