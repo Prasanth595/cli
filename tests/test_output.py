@@ -598,6 +598,27 @@ class TestFormatOptions:
         )
         assert parsed_args.format_options == expected_format_options
 
+    @pytest.mark.parametrize(
+        'options, expected_error',
+        [
+            ('json.indent:x', "invalid value 'x' in 'json.indent:x' (expected int got str)"),
+            ('json.nope:1', "invalid key 'json.nope'"),
+            ('json', "invalid option 'json'"),
+        ]
+    )
+    def test_invalid_format_options_reported_as_cli_error(
+        self, options, expected_error
+    ):
+        r = http(
+            '--offline',
+            '--format-options', options,
+            'example.org',
+            tolerate_error_exit_status=True,
+        )
+        assert r.exit_status == ExitStatus.ERROR
+        assert expected_error in r.stderr
+        assert 'Traceback' not in r.stderr
+
 
 @responses.activate
 def test_response_mime_overwrite():
