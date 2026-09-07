@@ -48,7 +48,7 @@ Go to <https://github.com/httpie/cli> and fork the project repository.
 
 ```bash
 # Clone your fork
-$ git clone git@github.com:<YOU>/httpie.git
+$ git clone git@github.com:<YOU>/cli.git httpie
 
 # Enter the project directory
 $ cd httpie
