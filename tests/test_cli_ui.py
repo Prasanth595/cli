@@ -6,6 +6,12 @@ from tests.utils import http
 NAKED_BASE_TEMPLATE = """\
 usage:
     http {extra_args}[METHOD] URL [REQUEST_ITEM ...]
+request items (common separators, run 'http --help' for all options):
+    ==    Query params
+    =     Data fields (string)
+    :=    Data fields (raw JSON)
+    @     File upload
+    :     HTTP headers
 
 error:
     {error_msg}

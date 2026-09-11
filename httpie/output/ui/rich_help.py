@@ -8,7 +8,14 @@ from rich.padding import Padding
 from rich.table import Table
 from rich.text import Text
 
-from httpie.cli.constants import SEPARATOR_GROUP_ALL_ITEMS
+from httpie.cli.constants import (
+    SEPARATOR_DATA_RAW_JSON,
+    SEPARATOR_DATA_STRING,
+    SEPARATOR_FILE_UPLOAD,
+    SEPARATOR_GROUP_ALL_ITEMS,
+    SEPARATOR_HEADER,
+    SEPARATOR_QUERY_PARAM,
+)
 from httpie.cli.options import Argument, ParserSpec, Qualifiers
 from httpie.output.ui.palette import GenericColor
 
@@ -120,6 +127,23 @@ def to_usage(
                 style=STYLE_USAGE_MISSING,
             )
 
+    return text
+
+
+REQUEST_ITEMS_CHEATSHEET = [
+    (SEPARATOR_QUERY_PARAM, 'Query params'),
+    (SEPARATOR_DATA_STRING, 'Data fields (string)'),
+    (SEPARATOR_DATA_RAW_JSON, 'Data fields (raw JSON)'),
+    (SEPARATOR_FILE_UPLOAD, 'File upload'),
+    (SEPARATOR_HEADER, 'HTTP headers'),
+]
+
+
+def to_request_items_cheatsheet() -> RenderableType:
+    text = Text()
+    for separator, description in REQUEST_ITEMS_CHEATSHEET:
+        text.append(f'    {separator:<6}{description}\n', style=STYLE_METAVAR)
+    text.rstrip()
     return text
 
 
