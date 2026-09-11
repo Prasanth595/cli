@@ -595,6 +595,19 @@ class HTTPieArgumentParser(BaseHTTPieArgumentParser):
         usage_text.append(rich_help.to_usage(self.spec, whitelist=whitelist))
         self.env.rich_error_console.print(usage_text)
 
+        from rich.console import Group
+        cheatsheet_heading = Text('request items', style='bold')
+        cheatsheet_heading.append(
+            " (common separators, run 'http --help' for all options):",
+            style='default',
+        )
+        self.env.rich_error_console.print(
+            Group(
+                cheatsheet_heading,
+                rich_help.to_request_items_cheatsheet(),
+            )
+        )
+
     def error(self, message):
         """Prints a usage message incorporating the message to stderr and
         exits."""
