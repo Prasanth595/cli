@@ -15,6 +15,15 @@ class TestWindowsOnly:
         http(httpbin + '/get', env=Environment())
 
 
+def test_is_available_false_on_windows(monkeypatch):
+    # Regression: os.system == 'nt' is always False (os.system is a function).
+    from httpie.output.ui import man_pages
+
+    monkeypatch.setattr(man_pages.os, 'name', 'nt')
+    monkeypatch.setattr(man_pages, 'NO_MAN_PAGES', False)
+    assert man_pages.is_available('http') is False
+
+
 class TestFakeWindows:
     def test_output_file_pretty_not_allowed_on_windows(self, tmp_path, httpbin):
         env = MockEnvironment(is_windows=True)
