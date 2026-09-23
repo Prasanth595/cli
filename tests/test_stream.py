@@ -129,6 +129,10 @@ def test_redirected_stream(httpbin):
         3
     ),
     (
+        ['Accept:Text/Event-Stream'],
+        3
+    ),
+    (
         ['Accept:text/plain'],
         1
     )
