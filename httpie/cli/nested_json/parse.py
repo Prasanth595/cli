@@ -137,8 +137,8 @@ def tokenize(source: str) -> Iterator[Token]:
         value = ''.join(buffer)
         kind = TokenKind.TEXT
         if not backslashes:
-            for variation, kind in [
-                (int, TokenKind.NUMBER),
+            for variation, variation_kind in [
+                (canonical_int, TokenKind.NUMBER),
                 (check_escaped_int, TokenKind.TEXT),
             ]:
                 try:
@@ -146,6 +146,7 @@ def tokenize(source: str) -> Iterator[Token]:
                 except ValueError:
                     continue
                 else:
+                    kind = variation_kind
                     break
         yield Token(
             kind=kind,
@@ -187,6 +188,21 @@ def check_escaped_int(value: str) -> str:
         raise ValueError('Not an escaped int') from exc
     else:
         return value[1:]
+
+
+def canonical_int(value: str) -> int:
+    """Convert to int only when the value has no leading zeros.
+
+    A literal such as ``01`` is a valid JSON *key*, not a number - JSON
+    numbers can't have leading zeros. Coercing it to ``int`` silently
+    rewrites the key to ``1`` and can collide with a real ``1`` key.
+    """
+    if not value:
+        raise ValueError('Not an int')
+    converted = int(value)
+    if str(converted) != value:
+        raise ValueError('Not a canonical int')
+    return converted
 
 
 def assert_cant_happen():

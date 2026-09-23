@@ -173,6 +173,16 @@ def test_complex_json_arguments_with_non_json(httpbin, request_type, value):
             {'bottle-on-wall': [1, 2, 3]},
         ),
         (
+            # Leading-zero keys stay keys and don't collide with '1'
+            ['01=x', '1=y'],
+            {'01': 'x', '1': 'y'},
+        ),
+        (
+            # ...but canonical integers still become numeric indices in paths
+            ['kids[0]=Thelma', 'kids[10]=Ashley'],
+            {'kids': ['Thelma', None, None, None, None, None, None, None, None, None, 'Ashley']},
+        ),
+        (
             [
                 'pet[species]=Dahut',
                 'pet[name]:="Hypatia"',
