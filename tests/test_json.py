@@ -132,13 +132,40 @@ def test_duplicate_keys_support_from_input_file():
 
 
 @pytest.mark.parametrize('value', [1, 1.1, True, 'some_value'])
-def test_simple_json_arguments_with_non_json(httpbin, value):
+@pytest.mark.parametrize('form_request_type', ['--form', '--multipart'])
+def test_simple_json_arguments_with_non_json(httpbin, value, form_request_type):
     r = http(
-        '--form',
+        form_request_type,
         httpbin + '/post',
         f'option:={json.dumps(value)}',
     )
     assert r.json['form'] == {'option': str(value)}
+
+
+def test_simple_json_arguments_with_non_json_and_multipart_embed(
+    httpbin, tmp_path
+):
+    # :=@ embeds a JSON file's value; it must reach the multipart body too.
+    json_file = tmp_path / 'value.json'
+    json_file.write_text(json.dumps([1, 2, 3]))
+    with pytest.raises(ParseError) as cm:
+        http(
+            '--multipart',
+            httpbin + '/post',
+            f'complex:=@{json_file}',
+            'plain=value',
+        )
+    cm.match('Cannot use complex JSON value types')
+
+    scalar_file = tmp_path / 'scalar.json'
+    scalar_file.write_text('42')
+    r = http(
+        '--multipart',
+        httpbin + '/post',
+        f'scalar:=@{scalar_file}',
+        'plain=value',
+    )
+    assert r.json['form'] == {'scalar': '42', 'plain': 'value'}
 
 
 @pytest.mark.parametrize(
