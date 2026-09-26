@@ -19,6 +19,7 @@ from httpie.cli.argtypes import (
 from httpie.cli.definition import parser
 from httpie.encoding import UTF8
 from httpie.output.formatters.colors import get_lexer, PIE_STYLE_NAMES, BUNDLED_STYLES
+from httpie.output.formatters.headers import HeadersFormatter
 from httpie.status import ExitStatus
 from .fixtures import XML_DATA_RAW, XML_DATA_FORMATTED
 from .utils import COLOR, CRLF, HTTP_OK, MockEnvironment, http, DUMMY_URL, strip_colors
@@ -378,6 +379,23 @@ class TestLineEndings:
 
 
 class TestFormatOptions:
+    def test_header_sort_retains_order_for_mixed_case_repeated_fields(self):
+        formatter = HeadersFormatter(format_options=PARSED_DEFAULT_FORMAT_OPTIONS)
+        headers = CRLF.join([
+            'HTTP/1.1 200 OK',
+            'set-cookie: first=1',
+            'X-Z: last',
+            'Set-Cookie: second=2',
+            'accept: text/plain',
+        ])
+        assert formatter.format_headers(headers) == CRLF.join([
+            'HTTP/1.1 200 OK',
+            'accept: text/plain',
+            'set-cookie: first=1',
+            'Set-Cookie: second=2',
+            'X-Z: last',
+        ])
+
     def test_header_formatting_options(self):
         def get_headers(sort):
             return http(
