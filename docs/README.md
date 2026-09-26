@@ -653,6 +653,8 @@ If your command includes some data [request items](#request-items), they are ser
 You can use `--json, -j` to explicitly set `Accept` to `application/json` regardless of whether you are sending data (it’s a shortcut for setting the header via the usual header notation: `http url Accept:'application/json, */*;q=0.5'`).
 Additionally, HTTPie will try to detect JSON responses even when the `Content-Type` is incorrectly `text/plain` or unknown.
 
+JSON media types are matched case-insensitively, so `Application/JSON` is formatted the same way as `application/json`.
+
 ### Non-string JSON fields
 
 Non-string JSON fields use the `:=` separator, which allows you to embed arbitrary JSON data into the resulting JSON object.
@@ -2598,4 +2600,3 @@ BSD-3-Clause: [LICENSE](https://github.com/httpie/cli/blob/master/LICENSE).
 ### Authors
 
 [Jakub Roztocil](https://roztocil.co) ([@jakubroztocil](https://twitter.com/jakubroztocil)) created HTTPie and [these fine people](https://github.com/httpie/cli/blob/master/AUTHORS.md) have contributed.
-

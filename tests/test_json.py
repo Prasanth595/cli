@@ -112,6 +112,23 @@ def test_duplicate_keys_support_from_response():
     assert JSON_WITH_DUPES_FORMATTED_UNSORTED in r
 
 
+@pytest.mark.parametrize('content_type', [
+    'APPLICATION/JSON',
+    'Application/Problem+JSON; charset=utf-8',
+])
+@responses.activate
+def test_json_formatter_accepts_case_insensitive_media_types(content_type):
+    responses.add(
+        responses.GET,
+        DUMMY_URL,
+        body='{"message":"ok"}',
+        content_type=content_type,
+    )
+    response = http('--pretty=format', '--body', DUMMY_URL)
+
+    assert '{\n    "message": "ok"\n}' in response
+
+
 def test_duplicate_keys_support_from_input_file():
     """JSON file with duplicate keys should be handled correctly."""
     args = (
