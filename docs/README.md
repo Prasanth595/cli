@@ -1542,7 +1542,7 @@ $ http --ssl=ssl3 https://vulnerable.example.org
 ### SSL ciphers
 
 You can specify the available ciphers with `--ciphers`.
-It should be a string in the [OpenSSL cipher list format](https://www.openssl.org/docs/man1.1.0/man1/ciphers.html).
+It should be a string in the [OpenSSL cipher list format](https://docs.openssl.org/3.5/man1/openssl-ciphers/).
 
 ```bash
 $ http --ciphers=ECDHE-RSA-AES128-GCM-SHA256 https://pie.dev/get

@@ -20,7 +20,7 @@ command (due to the underlying `httpie cli plugins` interface) explicitly depend
 The [`Release as Standalone Linux Binary`](https://github.com/httpie/cli/actions/workflows/release-linux-standalone.yml) will be automatically
 triggered when a new release is created, and it will submit the `.deb` package as a release asset.
 
-For making that asset available for all debian users, the release manager needs to go to the [`httpie/debian.httpie.io`](https://github.com/httpie/debian.httpie.io) repo
-and trigger the [`Update Index`](https://github.com/httpie/debian.httpie.io/actions/workflows/update-index.yml) action. It will automatically
-scrape all new debian packages from the release assets, properly update the indexes and create a new PR ([an example](https://github.com/httpie/debian.httpie.io/pull/1))
+For making that asset available for all debian users, the release manager needs to go to the `httpie/debian.httpie.io` repo
+and trigger the `Update Index` action. It will automatically
+scrape all new debian packages from the release assets, properly update the indexes and create a new PR
 which then will become active when merged.

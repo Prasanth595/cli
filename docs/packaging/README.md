@@ -21,13 +21,13 @@ The overall release process starts simple:
 4. Make a GitHub release (by copying the text in `CHANGELOG.md`)
 5. Push that release to PyPI (dispatch the `Release PyPI` GitHub action).
 6. Once PyPI is ready, push the release to the Snap, Homebrew and Chocolatey with their respective actions.
-7. Go to the [`httpie/debian.httpie.io`](https://github.com/httpie/debian.httpie.io) repo and trigger the package index workflow.
+7. Go to the `httpie/debian.httpie.io` repo and trigger the package index workflow.
 
 ## Company-specific tasks
 
 - Blank the `master_and_released_docs_differ_after` value in [config.json](https://github.com/httpie/cli/blob/master/docs/config.json).
 - Update the [contributors list](../contributors).
-- Update the HTTPie version bundled into [Termible](https://termible.io/) ([example](https://github.com/httpie/termible/pull/1)).
+- Update the HTTPie version bundled into [Termible](https://termible.io/).
 
 ## Finally, spread dowstream
 
