@@ -15,7 +15,7 @@ We will discuss setting up the environment, installing development tools, instal
 
 Note: Sending patches downstream does not seem easy. We failed to find where is located the package file on <https://gitlab.archlinux.org>. So we are relying on the last maintainer, daurnimator, and it works pretty well so far.
 
-Check <https://archlinux.org/packages/community/any/httpie/> and if the version is outdated, simply [report it](https://archlinux.org/packages/community/any/httpie/flag/).
+Check <https://archlinux.org/packages/extra/any/httpie/> and if the version is outdated, simply report it there.
 
 ## Hacking
 

@@ -106,7 +106,7 @@ tools:
     note: Also works for other Arch-derived distributions like ArcoLinux, EndeavourOS, Artix Linux, etc.
     links:
       homepage: https://archlinux.org/pacman/
-      package: https://archlinux.org/packages/community/any/httpie/
+      package: https://archlinux.org/packages/extra/any/httpie/
     commands:
       install:
         - pacman -Syu httpie
