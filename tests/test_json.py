@@ -7,6 +7,7 @@ from httpie.cli.constants import PRETTY_MAP
 from httpie.cli.exceptions import ParseError
 from httpie.cli.nested_json import NestedJSONSyntaxError
 from httpie.output.formatters.colors import ColorFormatter
+from httpie.output.utils import load_prefixed_json
 from httpie.utils import JsonDictPreservingDuplicateKeys
 
 from .fixtures import (
@@ -53,6 +54,14 @@ JSON_WITH_DUPES_FORMATTED_UNSORTED = """{
     "key": 3,
     "key": 7
 }"""
+
+
+def test_prefixed_json_does_not_chop_inside_the_body():
+    with pytest.raises(ValueError):
+        load_prefixed_json('{{"a": 1}')
+    prefix, obj = load_prefixed_json('while(1);{"a": 1}')
+    assert prefix == 'while(1);'
+    assert list(obj.items()) == [('a', 1)]
 
 
 @pytest.mark.parametrize('data_prefix', TEST_JSON_XXSI_PREFIXES)
