@@ -31,7 +31,9 @@ def parse_prefixed_json(data: str) -> Tuple[str, str]:
     Return a tuple (data prefix, actual JSON body).
 
     """
-    matches = re.findall(PREFIX_REGEX, data)
-    data_prefix = matches[0] if matches else ''
+    # Only a leading run is a prefix. findall() would take a match
+    # from inside the body and cut that many characters off the front.
+    match = re.match(PREFIX_REGEX, data)
+    data_prefix = match.group(0) if match else ''
     body = data[len(data_prefix):]
     return data_prefix, body
