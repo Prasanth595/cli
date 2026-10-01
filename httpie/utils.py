@@ -273,7 +273,7 @@ class LockFileError(ValueError):
 
 @contextmanager
 def open_with_lockfile(file: Path, *args, **kwargs) -> Generator[IO[Any], None, None]:
-    file_id = base64.b64encode(os.fsencode(file)).decode()
+    file_id = base64.urlsafe_b64encode(os.fsencode(file)).decode()
     target_file = Path(tempfile.gettempdir()) / file_id
 
     # Have an atomic-like touch here, so we'll tighten the possibility of
