@@ -1892,7 +1892,7 @@ Formatting has the following effects:
 - HTTP headers are sorted by name.
 - JSON data is indented, sorted by keys, and unicode escapes are converted
   to the characters they represent.
-- XML and XHTML data is indented.
+- XML and XHTML data is indented. XML media types are matched case-insensitively.
 
 Please note that sometimes there might be changes made by formatters on the actual response body (e.g.,
 collapsing empty tags on XML) but the end result will always be semantically indistinguishable. Some of
