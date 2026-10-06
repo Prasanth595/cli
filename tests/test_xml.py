@@ -97,3 +97,20 @@ def test_invalid_xml(file):
     # No formatting done, data is simply printed as-is.
     r = http(DUMMY_URL)
     assert xml_data in r
+
+
+@pytest.mark.parametrize('content_type', [
+    'APPLICATION/XML',
+    'Application/Atom+XML; charset=utf-8',
+])
+@responses.activate
+def test_xml_media_type_is_case_insensitive(content_type):
+    responses.add(
+        responses.GET,
+        DUMMY_URL,
+        body=XML_DATA_RAW,
+        content_type=content_type,
+    )
+
+    r = http('--pretty=format', '--body', DUMMY_URL)
+    assert XML_DATA_FORMATTED in r

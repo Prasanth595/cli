@@ -57,7 +57,7 @@ class XMLFormatter(FormatterPlugin):
         self.enabled = self.format_options['xml']['format']
 
     def format_body(self, body: str, mime: str):
-        if 'xml' not in mime:
+        if 'xml' not in mime.lower():
             return body
 
         from xml.parsers.expat import ExpatError
