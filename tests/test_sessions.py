@@ -394,12 +394,40 @@ class TestExpiredCookies(CookieTestBase):
         assert 'cookie1' in updated_session['cookies']
         assert 'cookie2' not in updated_session['cookies']
 
+    def test_session_keeps_cookie_when_max_age_overrides_expired_date(self, localhost_http_server):
+        http(
+            '--session', str(self.session_path),
+            localhost_http_server + '/cookies/set',
+            'cookie2==bar; Max-Age=3600; Expires=Thu, 01-Jan-1970 00:00:00 GMT; Path=/',
+        )
+        r = http(
+            '--session', str(self.session_path),
+            '--print=H',
+            localhost_http_server + '/cookies',
+        )
+        assert 'cookie2=bar' in r
+
     def test_get_expired_cookies_using_max_age(self):
         cookies = 'one=two; Max-Age=0; path=/; domain=.tumblr.com; HttpOnly'
         expected_expired = [
             {'name': 'one', 'path': '/'}
         ]
         assert get_expired_cookies(cookies, now=None) == expected_expired
+
+    @pytest.mark.parametrize(
+        'expires, max_age, expired',
+        [
+            ('Thu, 01-Jan-1970 00:00:00 GMT', '3600', False),
+            ('Fri, 12 Jun 2020 12:28:55 GMT', '0', True),
+            ('invalid', '0', True),
+            ('Thu, 01-Jan-1970 00:00:00 GMT', 'invalid', True),
+            ('Fri, 12 Jun 2020 12:28:55 GMT', 'invalid', False),
+        ]
+    )
+    def test_max_age_takes_precedence_over_expires(self, expires, max_age, expired):
+        cookies = f'one=two; Expires={expires}; Max-Age={max_age}; Path=/'
+        expected = [{'name': 'one', 'path': '/'}] if expired else []
+        assert get_expired_cookies(cookies, now=1000.0) == expected
 
     @pytest.mark.parametrize(
         'cookies, now, expected_expired',
@@ -426,11 +454,10 @@ class TestExpiredCookies(CookieTestBase):
                 ]
             ),
             (
-                # Checks we gracefully ignore expires date in invalid format.
-                # <https://github.com/httpie/cli/issues/963>
+                # A valid Max-Age still applies when Expires is malformed.
                 'pfg=; Expires=Sat, 19-Sep-2020 06:58:14 GMT+0000; Max-Age=0; path=/; domain=.tumblr.com; secure; HttpOnly',
                 None,
-                []
+                [{'name': 'pfg', 'path': '/'}]
             ),
             (
                 'hello=world; Path=/; Expires=Fri, 12 Jun 2020 12:28:55 GMT; HttpOnly',

@@ -193,8 +193,6 @@ def _max_age_to_expires(cookies, now):
 
     """
     for cookie in cookies:
-        if 'expires' in cookie:
-            continue
         max_age = cookie.get('max-age')
         if max_age and max_age.isdigit():
             cookie['expires'] = now + float(max_age)
