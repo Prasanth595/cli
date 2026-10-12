@@ -39,3 +39,4 @@
 - [Elena Lape](https://github.com/elenalape)
 - [Rohit Sehgal](https://github.com/r0hi7)
 - [Bartłomiej Jacak](https://github.com/bartekjacak)
+- [Arif Uğur Çelik](https://github.com/augrclk)

@@ -11,6 +11,8 @@ our zlib-encoded request data.
 import base64
 import zlib
 
+import pytest
+
 from .fixtures import FILE_PATH, FILE_CONTENT
 from httpie.status import ExitStatus
 from .utils import StdinBytesIO, http, HTTP_OK, MockEnvironment
@@ -51,6 +53,22 @@ def test_compress_skip_negative_ratio(httpbin_both):
     assert HTTP_OK in r
     assert 'Content-Encoding' not in r.json['headers']
     assert r.json['json'] == {'foo': 'bar'}
+
+
+@pytest.mark.parametrize('options, items, expected_body', [
+    ([], ['foo=' + 'bar' * 1024], '{"foo": "' + 'bar' * 1024 + '"}'),
+    (['--raw', 'bar' * 1024], [], 'bar' * 1024),
+], ids=['json', 'raw'])
+def test_compress_positive_ratio(httpbin_both, options, items, expected_body):
+    r = http('--compress', *options, 'POST', httpbin_both + '/post', *items)
+
+    assert HTTP_OK in r
+    assert r.json['headers']['Content-Encoding'] == 'deflate'
+    assert_decompressed_equal(r.json['data'], expected_body)
+
+    compressed_body = base64.b64decode(r.json['data'].split(',', 1)[1])
+    assert len(compressed_body) < len(expected_body.encode())
+    assert int(r.json['headers']['Content-Length']) == len(compressed_body)
 
 
 def test_compress_force_with_negative_ratio(httpbin_both):
