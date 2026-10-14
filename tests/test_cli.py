@@ -27,6 +27,47 @@ class TestItemParsing:
         for item in items:
             pytest.raises(argparse.ArgumentTypeError, self.key_value_arg, item)
 
+    def test_quoted_multiword_value_parses_correctly(self):
+        """A properly quoted multi-word value parses correctly.
+
+        When the shell passes `field_name=Foo Bar` as a single argument
+        (i.e. the user quoted it), HTTPie should accept it and keep the
+        full string as the value.
+        """
+        item = self.key_value_arg('field_name=Foo Bar')
+        assert item.key == 'field_name'
+        assert item.value == 'Foo Bar'
+
+    def test_unquoted_multiword_value_second_token_raises(self):
+        """A bare fragment like 'Bar' raises ArgumentTypeError.
+
+        When a user forgets to quote a multi-word value, the shell splits
+        `field_name=Foo Bar` into two arguments: `field_name=Foo` and
+        `Bar`. The second one has no separator and must be rejected.
+        """
+        with pytest.raises(argparse.ArgumentTypeError):
+            self.key_value_arg('Bar')
+
+    def test_unquoted_multiword_value_error_contains_quoting_hint(self):
+        """The error for an unquoted fragment should hint about quoting.
+
+        The current message ('Bar' is not a valid value) is technically
+        correct but does not tell the user that the real problem is a
+        missing pair of quotes around a multi-word value.
+        """
+        with pytest.raises(argparse.ArgumentTypeError) as exc_info:
+            self.key_value_arg('Bar')
+        message = str(exc_info.value)
+        assert 'quote' in message.lower(), (
+            f"Expected a quoting hint in the error message, got: {message!r}"
+        )
+        assert (
+            'multi-word' in message.lower()
+            or 'multiple words' in message.lower()
+        ), (
+            f"Expected the hint to mention multi-word values, got: {message!r}"
+        )
+
     def test_escape_separator(self):
         items = RequestItems.from_args([
             # headers

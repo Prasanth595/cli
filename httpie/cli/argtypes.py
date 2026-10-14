@@ -103,8 +103,11 @@ class KeyValueArgType:
                 break
 
         else:
-            raise argparse.ArgumentTypeError(f'{s!r} is not a valid value')
-
+            raise argparse.ArgumentTypeError(
+                f'{s!r} is not a valid value. '
+                f'Did you forget to quote a multi-word value? '
+                f'Try wrapping it in quotes, e.g. field_name="Foo Bar"'
+            )
         return self.key_value_class(key=key, value=value, sep=sep, orig=s)
 
     def tokenize(self, s: str) -> List[Union[str, Escaped]]:
