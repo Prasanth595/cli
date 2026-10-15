@@ -123,15 +123,28 @@ def filename_from_url(url: str, content_type: Optional[str]) -> str:
     return fn
 
 
+def filename_length(filename: str) -> int:
+    # PC_NAME_MAX counts encoded bytes on POSIX. Keep the character-count
+    # fallback used on Windows, where pathconf is unavailable.
+    return len(filename) if os.name == 'nt' else len(os.fsencode(filename))
+
+
 def trim_filename(filename: str, max_len: int) -> str:
-    if len(filename) > max_len:
-        trim_by = len(filename) - max_len
-        name, ext = os.path.splitext(filename)
-        if trim_by >= len(name):
-            filename = filename[:-trim_by]
-        else:
-            filename = name[:-trim_by] + ext
-    return filename
+    length = filename_length(filename)
+    if length <= max_len:
+        return filename
+
+    name, ext = os.path.splitext(filename)
+    if filename_length(ext) >= max_len:
+        name, ext = filename, ''
+    remaining = filename_length(name) + filename_length(ext)
+    trim_by = 0
+    for character in reversed(name):
+        if remaining <= max_len:
+            break
+        remaining -= filename_length(character)
+        trim_by += 1
+    return name[:-trim_by] + ext
 
 
 def get_filename_max_length(directory: str) -> int:
@@ -143,7 +156,7 @@ def get_filename_max_length(directory: str) -> int:
 
 def trim_filename_if_needed(filename: str, directory='.', extra=0) -> str:
     max_len = get_filename_max_length(directory) - extra
-    if len(filename) > max_len:
+    if filename_length(filename) > max_len:
         filename = trim_filename(filename, max_len)
     return filename
 
