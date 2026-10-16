@@ -119,6 +119,35 @@ class TestDownloadUtils:
         actual = get_unique_filename(orig_name, attempts(unique_on_attempt))
         assert expected == actual
 
+    @pytest.mark.skipif(os.name == 'nt', reason='POSIX filename limits count bytes')
+    @pytest.mark.parametrize('filename, expected', [
+        ('é' * 5, 'é' * 5),
+        ('é' * 6, 'é' * 5),
+        ('猫' * 4 + '.txt', '猫' * 2 + '.txt'),
+        ('猫' * 4, '猫' * 3),
+        ('x.' + '猫' * 4, 'x.' + '猫' * 2),
+        ('é' * 4 + '.猫', 'é' * 3 + '.猫'),
+    ])
+    @mock.patch('httpie.downloads.get_filename_max_length', return_value=10)
+    def test_unique_filename_multibyte(self, max_length, filename, expected):
+        assert get_unique_filename(filename, exists=lambda _: False) == expected
+
+    @pytest.mark.skipif(os.name == 'nt', reason='POSIX filename limits count bytes')
+    def test_multibyte_download_filename_can_be_created(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        limit = os.pathconf(tmp_path, 'PC_NAME_MAX')
+        filename = '猫' * (limit // 3) + '.txt'
+        response = Response('http://example.org/', headers={
+            'Content-Disposition': "attachment; filename*=UTF-8''" + requests.utils.quote(filename),
+        })
+        for suffix in ('', '-1'):
+            with Downloader._get_output_file_from_response(response.url, response) as output:
+                assert output.name.endswith('.txt' + suffix)
+                assert len(os.fsencode(output.name)) <= limit
+                assert '猫' in output.name
+                output.write(b'downloaded')
+            assert (tmp_path / output.name).read_bytes() == b'downloaded'
+
 
 class TestDownloads:
 
