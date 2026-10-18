@@ -10,6 +10,7 @@ class JSONFormatter(FormatterPlugin):
         self.enabled = self.format_options['json']['format']
 
     def format_body(self, body: str, mime: str) -> str:
+        mime = mime.lower()
         maybe_json = [
             'json',
             'javascript',
