@@ -392,6 +392,14 @@ class TestFormatOptions:
         assert f'XXX: foo{CRLF}ZZZ: foo' in r_sorted
         assert f'ZZZ: foo{CRLF}XXX: foo' in r_unsorted
 
+    def test_header_sorting_is_case_insensitive(self):
+        r = http(
+            '--offline', '--print=H',
+            '--format-options', 'headers.sort:true',
+            'example.org', 'Zebra:foo', 'apple:foo',
+        )
+        assert r.index('apple: foo') < r.index('Zebra: foo')
+
     @pytest.mark.parametrize(
         'options, expected_json',
         [
