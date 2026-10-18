@@ -629,3 +629,41 @@ def test_response_mime_overwrite_incorrect():
     # The provided Content-Type is simply ignored, and so no formatting is done.
     r = http('--response-mime=incorrect/type', DUMMY_URL)
     assert XML_DATA_RAW in r
+
+
+class TestJSONFormatterMIME:
+    """JSONFormatter must match the body MIME type case-insensitively (#1958)."""
+
+    @staticmethod
+    def make_formatter():
+        from httpie.output.formatters.json import JSONFormatter
+        return JSONFormatter(
+            format_options={'json': {'format': True, 'sort_keys': True, 'indent': 4}},
+            explicit_json=False,
+        )
+
+    @pytest.mark.parametrize(
+        'mime',
+        [
+            'application/json',
+            'APPLICATION/JSON',
+            'Application/Problem+JSON; charset=UTF-8',
+        ]
+    )
+    def test_format_body_matches_mime_case_insensitively(self, mime: str):
+        formatted = self.make_formatter().format_body('{"a": 1}', mime)
+        assert '\n' in formatted
+        assert json.loads(formatted) == {'a': 1}
+
+    @pytest.mark.parametrize(
+        'mime',
+        [
+            'text/plain',
+            'application/xml',
+        ]
+    )
+    def test_format_body_case_parity_for_non_json(self, mime: str):
+        # An upper-cased MIME type behaves exactly like its lower-case form.
+        body = '{"a": 1}'
+        formatter = self.make_formatter()
+        assert formatter.format_body(body, mime.upper()) == formatter.format_body(body, mime)
