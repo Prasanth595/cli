@@ -83,13 +83,15 @@ class TestQuietFlag:
         )
         assert not r.stderr
 
-    def test_quiet_quiet_with_check_status_non_zero_pipe(self, httpbin):
+    @pytest.mark.parametrize('quiet_flags', [('--quiet', '--quiet'), ('-qq',)])
+    def test_quiet_quiet_with_check_status_non_zero_pipe(self, httpbin, quiet_flags):
         r = http(
-            '--quiet', '--quiet', '--check-status', httpbin + '/status/500',
+            *quiet_flags, '--check-status', httpbin + '/status/500',
             tolerate_error_exit_status=True,
             env=MockEnvironment(stdout_isatty=False)
         )
-        assert 'http: warning: HTTP 500' in r.stderr
+        assert not r.stderr
+        assert r.exit_status == ExitStatus.ERROR_HTTP_5XX
 
     @mock.patch('httpie.core.program')
     @pytest.mark.parametrize('flags, expected_warnings', [
@@ -110,10 +112,12 @@ class TestQuietFlag:
 
         assert len(record) == expected_warnings
 
-    def test_double_quiet_on_error(self, httpbin):
+    @pytest.mark.parametrize('stdout_isatty', [True, False])
+    def test_double_quiet_on_error(self, httpbin, stdout_isatty):
         r = http(
             '-qq', '--check-status', '$$$this.does.not.exist$$$',
             tolerate_error_exit_status=True,
+            env=MockEnvironment(stdout_isatty=stdout_isatty),
         )
         assert not r
         assert 'Couldn’t resolve the given hostname' in r.stderr
